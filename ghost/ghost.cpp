@@ -123,7 +123,7 @@ using namespace boost :: filesystem;
 string gCFGFile;
 string gLogFile;
 uint32_t gLogMethod;
-ofstream *gLog = NULL;
+std::ofstream *gLog = NULL;
 CGHost *gGHost = NULL;
 
 #define WHATISMYIP "www.whatismyip.com"
@@ -461,7 +461,7 @@ void CONSOLE_Print( string message )
 	{
 		if( gLogMethod == 1 )
 		{
-			ofstream Log;
+			std::ofstream Log;
 			Log.open( gLogFile.c_str( ), ios :: app );
 
 			if( !Log.fail( ) )
@@ -521,7 +521,7 @@ int main( int argc, char **argv )
 	string ProcessID = UTIL_ToString(getpid( ));
 	string ProcessFile = "data/process.ini";
 #endif
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open (ProcessFile.c_str());
 	myfile << "[GHOST]" << endl;
 	myfile << "ProcessID = " << ProcessID << endl;
@@ -553,7 +553,7 @@ int main( int argc, char **argv )
 			// log method 2: open the log on startup, flush the log for every message, close the log on shutdown
 			// the log file CANNOT be edited/moved/deleted while GHost++ is running
 
-			gLog = new ofstream( );
+			gLog = new std::ofstream( );
 			gLog->open( gLogFile.c_str( ), ios :: app );
 		}
 	}
@@ -2271,7 +2271,7 @@ void CGHost :: LoadIPToCountryDataOpt( )
 		if (file_len!=0)
 		{
 			string File = "ips.cfg";
-			ofstream tmpcfg;
+			std::ofstream tmpcfg;
 			tmpcfg.open( File.c_str( ), ios :: trunc );
 			int size = (int)file_len;
 			tmpcfg << "size = " << UTIL_ToString(size) << endl;
@@ -2291,7 +2291,7 @@ void CGHost :: LoadIPToCountryDataOpt( )
 
 void CGHost :: LoadIPToCountryData( )
 {
-	ifstream in;
+	std::ifstream in;
 	in.open( "ip-to-country.csv" );
 
 	if( in.fail( ) )
@@ -3877,7 +3877,7 @@ void CGHost :: ReloadConfig ()
 void CGHost :: ReadChannelWelcome ()
 {
 	string file = "channelwelcome.txt";
-	ifstream in;
+	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_ChannelWelcome.clear();
 	if( in.fail( ) )
@@ -3904,7 +3904,7 @@ void CGHost :: ReadChannelWelcome ()
 void CGHost :: ReadProviders ()
 {
 	string file = "providers.txt";
-	ifstream in;
+	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Providers.clear();
 	if( in.fail( ) )
@@ -3931,7 +3931,7 @@ void CGHost :: ReadProviders ()
 void CGHost :: ReadWelcome ()
 {
 	string file = "welcome.txt";
-	ifstream in;
+	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Welcome.clear();
 	if( in.fail( ) )
@@ -3985,7 +3985,7 @@ string CGHost :: GetMars ()
 void CGHost :: ReadMars ()
 {
 	string file = "mars.txt";
-	ifstream in;
+	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Mars.clear();
 	if( in.fail( ) )
@@ -4362,7 +4362,7 @@ uint32_t CGHost :: CMDAccessAllOwner ()
 void CGHost :: SaveHostCounter()
 {
 	string File = "hostcounter.cfg";
-	ofstream tmpcfg;
+	std::ofstream tmpcfg;
 	tmpcfg.open( File.c_str( ), ios :: trunc );
 	tmpcfg << "hostcounter = " << UTIL_ToString(m_HostCounter) << endl;
 	tmpcfg.close( );
@@ -4734,7 +4734,7 @@ void CMyCallableDownloadFile :: operator( )( )
 
 	Replace( file, "%20", " ");
 	uint32_t totalsize=0;
-	ofstream myfile;
+	std::ofstream myfile;
 	string path = m_Path;
 	string pfile = path + file;
 	myfile.open (pfile.c_str(), ios_base::binary);

@@ -39,7 +39,7 @@ CConfig :: ~CConfig( )
 
 void CConfig :: Read( string file )
 {
-	ifstream in;
+	std::ifstream in;
 	in.open( file.c_str( ) );
 
 	if( in.fail( ) )

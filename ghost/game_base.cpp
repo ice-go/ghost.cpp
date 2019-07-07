@@ -257,7 +257,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 
 	if( !m_GHost->m_IPBlackListFile.empty( ) )
 	{
-		ifstream in;
+		std::ifstream in;
 		in.open( m_GHost->m_IPBlackListFile.c_str( ) );
 
 		if( in.fail( ) )
@@ -1394,7 +1394,7 @@ bool CBaseGame :: Update( void *fd, void *send_fd )
 	{
 		CONSOLE_Print("[GAME: " + m_GameName + "] loading gameloaded.txt");
 		m_GameLoadedMessage = true;
-		ifstream inn;
+		std::ifstream inn;
 		inn.open( "gameloaded.txt" );
 
 		if( !inn.fail( ) )
@@ -2307,7 +2307,7 @@ void CBaseGame :: SendEndMessage( )
 {
 	// read from gameover.txt if available
 
-	ifstream in;
+	std::ifstream in;
 	in.open( "gameover.txt" );
 
 	if( !in.fail( ) )

@@ -634,7 +634,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 		string spad = string();
 		string fmap = m_MapLocalPath.substr(0,m_MapLocalPath.length()-4);
 		string File = m_GHost->m_MapCFGPath+ fmap + ".cfg";
-		ofstream tmpcfg;
+		std::ofstream tmpcfg;
 		tmpcfg.open( File.c_str( ), ios :: trunc );
 		s = "# map file for " + m_MapLocalPath+" #";
 		spad = spad.insert(0,s.length(),'#');

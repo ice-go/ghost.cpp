@@ -219,7 +219,7 @@ void CTCPSocket :: Reset( )
 
 	if( !m_LogFile.empty( ) )
 	{
-		ofstream Log;
+		std::ofstream Log;
 		Log.open( m_LogFile.c_str( ), ios :: app );
 
 		if( !Log.fail( ) )
@@ -274,7 +274,7 @@ void CTCPSocket :: DoRecv( fd_set *fd )
 
 			if( !m_LogFile.empty( ) )
 			{
-				ofstream Log;
+				std::ofstream Log;
 				Log.open( m_LogFile.c_str( ), ios :: app );
 
 				if( !Log.fail( ) )
@@ -316,7 +316,7 @@ void CTCPSocket :: DoSend( fd_set *send_fd )
 
 			if( !m_LogFile.empty( ) )
 			{
-				ofstream Log;
+				std::ofstream Log;
 				Log.open( m_LogFile.c_str( ), ios :: app );
 
 				if( !Log.fail( ) )

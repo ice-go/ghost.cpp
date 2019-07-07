@@ -491,7 +491,7 @@ bool UTIL_FileExists( string file )
 
 string UTIL_FileRead( string file, uint32_t start, uint32_t length )
 {
-	ifstream IS;
+	std::ifstream IS;
 	IS.open( file.c_str( ), ios :: binary );
 
 	if( IS.fail( ) )
@@ -525,7 +525,7 @@ string UTIL_FileRead( string file, uint32_t start, uint32_t length )
 
 string UTIL_FileRead( string file )
 {
-	ifstream IS;
+	std::ifstream IS;
 	IS.open( file.c_str( ), ios :: binary );
 
 	if( IS.fail( ) )
@@ -556,7 +556,7 @@ string UTIL_FileRead( string file )
 
 bool UTIL_FileWrite( string file, unsigned char *data, uint32_t length )
 {
-	ofstream OS;
+	std::ofstream OS;
 	OS.open( file.c_str( ), ios :: binary );
 
 	if( OS.fail( ) )
