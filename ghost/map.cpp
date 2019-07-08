@@ -26,7 +26,10 @@
 #include "map.h"
 
 #define __STORMLIB_SELF__
-#include <stormlib/StormLib.h>
+namespace storm
+{
+	#include <StormLib/StormLib.h>
+}
 
 #define ROTL(x,n) ((x)<<(n))|((x)>>(32-(n)))	// this won't work with signed types
 #define ROTR(x,n) ((x)>>(n))|((x)<<(32-(n)))	// this won't work with signed types
@@ -180,10 +183,10 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 	// load the map MPQ
 
 	string MapMPQFileName = m_GHost->m_MapPath + m_MapLocalPath;
-	HANDLE MapMPQ;
+	storm::HANDLE MapMPQ;
 	bool MapMPQReady = false;
 
-	if( SFileOpenArchive( MapMPQFileName.c_str( ), 0, MPQ_OPEN_FORCE_MPQ_V1, &MapMPQ ) )
+	if( storm::SFileOpenArchive( MapMPQFileName.c_str( ), 0, MPQ_OPEN_FORCE_MPQ_V1, &MapMPQ ) )
 	{
 		CONSOLE_Print( "[MAP] loading MPQ file [" + MapMPQFileName + "]" );
 		MapMPQReady = true;
@@ -237,20 +240,20 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 
 				if( MapMPQReady )
 				{
-					HANDLE SubFile;
+					storm::HANDLE SubFile;
 
 					// override common.j
 
-					if( SFileOpenFileEx( MapMPQ, "Scripts\\common.j", 0, &SubFile ) )
+					if( storm::SFileOpenFileEx( MapMPQ, "Scripts\\common.j", 0, &SubFile ) )
 					{
-						uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+						uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 						if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 						{
 							char *SubFileData = new char[FileLength];
-							DWORD BytesRead = 0;
+							storm::DWORD BytesRead = 0;
 
-							if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+							if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 							{
 								CONSOLE_Print( "[MAP] overriding default common.j with map copy while calculating map_crc/sha1" );
 								OverrodeCommonJ = true;
@@ -261,7 +264,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 							delete [] SubFileData;
 						}
 
-						SFileCloseFile( SubFile );
+						storm::SFileCloseFile( SubFile );
 					}
 				}
 
@@ -273,20 +276,20 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 
 				if( MapMPQReady )
 				{
-					HANDLE SubFile;
+					storm::HANDLE SubFile;
 
 					// override blizzard.j
 
-					if( SFileOpenFileEx( MapMPQ, "Scripts\\blizzard.j", 0, &SubFile ) )
+					if( storm::SFileOpenFileEx( MapMPQ, "Scripts\\blizzard.j", 0, &SubFile ) )
 					{
-						uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+						uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 						if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 						{
 							char *SubFileData = new char[FileLength];
-							DWORD BytesRead = 0;
+							storm::DWORD BytesRead = 0;
 
-							if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+							if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 							{
 								CONSOLE_Print( "[MAP] overriding default blizzard.j with map copy while calculating map_crc/sha1" );
 								OverrodeBlizzardJ = true;
@@ -297,7 +300,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 							delete [] SubFileData;
 						}
 
-						SFileCloseFile( SubFile );
+						storm::SFileCloseFile( SubFile );
 					}
 				}
 
@@ -333,18 +336,18 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 						if( FoundScript && *i == "scripts\\war3map.j" )
 							continue;
 
-						HANDLE SubFile;
+						storm::HANDLE SubFile;
 
-						if( SFileOpenFileEx( MapMPQ, (*i).c_str( ), 0, &SubFile ) )
+						if( storm::SFileOpenFileEx( MapMPQ, (*i).c_str( ), 0, &SubFile ) )
 						{
-							uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+							uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 							if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 							{
 								char *SubFileData = new char[FileLength];
-								DWORD BytesRead = 0;
+								storm::DWORD BytesRead = 0;
 
-								if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+								if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 								{
 									if( *i == "war3map.j" || *i == "scripts\\war3map.j" )
 										FoundScript = true;
@@ -357,7 +360,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 								delete [] SubFileData;
 							}
 
-							SFileCloseFile( SubFile );
+							storm::SFileCloseFile( SubFile );
 						}
 						else
 						{
@@ -397,18 +400,18 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 	{
 		if( MapMPQReady )
 		{
-			HANDLE SubFile;
+			storm::HANDLE SubFile;
 
-			if( SFileOpenFileEx( MapMPQ, "war3map.w3i", 0, &SubFile ) )
+			if( storm::SFileOpenFileEx( MapMPQ, "war3map.w3i", 0, &SubFile ) )
 			{
-				uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+				uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 				if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 				{
 					char *SubFileData = new char[FileLength];
-					DWORD BytesRead = 0;
+					storm::DWORD BytesRead = 0;
 
-					if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+					if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 					{
 						istringstream ISS( string( SubFileData, BytesRead ) );
 
@@ -616,7 +619,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 					delete [] SubFileData;
 				}
 
-				SFileCloseFile( SubFile );
+				storm::SFileCloseFile( SubFile );
 			}
 			else
 				CONSOLE_Print( "[MAP] unable to calculate map_width, map_height, map_slot<x>, map_numplayers, map_numteams - couldn't find war3map.w3i in MPQ file" );
@@ -758,7 +761,7 @@ void CMap :: Load( CConfig *CFG, string nCFGFile )
 	// close the map MPQ
 
 	if( MapMPQReady )
-		SFileCloseArchive( MapMPQ );
+		storm::SFileCloseArchive( MapMPQ );
 
 	m_MapPath = CFG->GetString( "map_path", string( ) );
 

@@ -54,7 +54,10 @@
 using namespace boost :: filesystem;
 
 #define __STORMLIB_SELF__
-#include <stormlib/StormLib.h>
+namespace storm
+{
+	#include <StormLib/StormLib.h>
+}
 
 /*
 
@@ -2177,25 +2180,25 @@ void CGHost :: SetConfigs( CConfig *CFG )
 void CGHost :: ExtractScripts( )
 {
 	string PatchMPQFileName = m_Warcraft3Path + "War3Patch.mpq";
-	HANDLE PatchMPQ;
+	storm::HANDLE PatchMPQ;
 
-	if( SFileOpenArchive( PatchMPQFileName.c_str( ), 0, MPQ_OPEN_FORCE_MPQ_V1, &PatchMPQ ) )
+	if( storm::SFileOpenArchive( PatchMPQFileName.c_str( ), 0, MPQ_OPEN_FORCE_MPQ_V1, &PatchMPQ ) )
 	{
 		CONSOLE_Print( "[GHOST] loading MPQ file [" + PatchMPQFileName + "]" );
-		HANDLE SubFile;
+		storm::HANDLE SubFile;
 
 		// common.j
 
-		if( SFileOpenFileEx( PatchMPQ, "Scripts\\common.j", 0, &SubFile ) )
+		if( storm::SFileOpenFileEx( PatchMPQ, "Scripts\\common.j", 0, &SubFile ) )
 		{
-			uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+			uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 			if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 			{
 				char *SubFileData = new char[FileLength];
-				DWORD BytesRead = 0;
+				storm::DWORD BytesRead = 0;
 
-				if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+				if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 				{
 					CONSOLE_Print( "[GHOST] extracting Scripts\\common.j from MPQ file to [" + m_MapCFGPath + "common.j]" );
 					UTIL_FileWrite( m_MapCFGPath + "common.j", (unsigned char *)SubFileData, BytesRead );
@@ -2206,23 +2209,23 @@ void CGHost :: ExtractScripts( )
 				delete [] SubFileData;
 			}
 
-			SFileCloseFile( SubFile );
+			storm::SFileCloseFile( SubFile );
 		}
 		else
 			CONSOLE_Print( "[GHOST] couldn't find Scripts\\common.j in MPQ file" );
 
 		// blizzard.j
 
-		if( SFileOpenFileEx( PatchMPQ, "Scripts\\blizzard.j", 0, &SubFile ) )
+		if( storm::SFileOpenFileEx( PatchMPQ, "Scripts\\blizzard.j", 0, &SubFile ) )
 		{
-			uint32_t FileLength = SFileGetFileSize( SubFile, NULL );
+			uint32_t FileLength = storm::SFileGetFileSize( SubFile, NULL );
 
 			if( FileLength > 0 && FileLength != 0xFFFFFFFF )
 			{
 				char *SubFileData = new char[FileLength];
-				DWORD BytesRead = 0;
+				storm::DWORD BytesRead = 0;
 
-				if( SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead ) )
+				if( storm::SFileReadFile( SubFile, SubFileData, FileLength, &BytesRead, NULL ) )
 				{
 					CONSOLE_Print( "[GHOST] extracting Scripts\\blizzard.j from MPQ file to [" + m_MapCFGPath + "blizzard.j]" );
 					UTIL_FileWrite( m_MapCFGPath + "blizzard.j", (unsigned char *)SubFileData, BytesRead );
@@ -2233,15 +2236,15 @@ void CGHost :: ExtractScripts( )
 				delete [] SubFileData;
 			}
 
-			SFileCloseFile( SubFile );
+			storm::SFileCloseFile( SubFile );
 		}
 		else
 			CONSOLE_Print( "[GHOST] couldn't find Scripts\\blizzard.j in MPQ file" );
 
-		SFileCloseArchive( PatchMPQ );
+		storm::SFileCloseArchive( PatchMPQ );
 	}
 	else
-		CONSOLE_Print( "[GHOST] warning - unable to load MPQ file [" + PatchMPQFileName + "] - error code " + UTIL_ToString( GetLastError( ) ) );
+		CONSOLE_Print( "[GHOST] warning - unable to load MPQ file [" + PatchMPQFileName + "] - error code " + UTIL_ToString( storm::GetLastError( ) ) );
 }
 
 void CGHost :: LoadIPToCountryDataOpt( )
