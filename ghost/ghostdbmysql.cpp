@@ -3495,7 +3495,7 @@ string CGHostDBMySQL :: RunQuery( string query )
 	else if( mysql_ping( (MYSQL *)Connection ) != 0 )
 		m_Error = mysql_error( (MYSQL *)Connection );
 	if (m_Error!="")
-		return false;
+		return string();
 	string error;
 	string result =  MySQLRunQuery(Connection, &error, query);
 
@@ -3533,7 +3533,7 @@ CDBBan * CGHostDBMySQL :: BanCheck( string server, string user, string ip, uint3
 	else if( mysql_ping( (MYSQL *)Connection ) != 0 )
 		m_Error = mysql_error( (MYSQL *)Connection );
 	if (m_Error!="")
-		return false;
+		return NULL;
 	string error;
 
 	CDBBan *result = NULL;
@@ -3702,7 +3702,7 @@ string CGHostDBMySQL :: WarnReasonsCheck( string user, uint32_t warn )
 	else if( mysql_ping( (MYSQL *)Connection ) != 0 )
 		m_Error = mysql_error( (MYSQL *)Connection );
 	if (m_Error!="")
-		return false;
+		return string();
 	string error;
 
 	string result;
