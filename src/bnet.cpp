@@ -5082,7 +5082,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 /*
 					CConfig CFGF;
 					CConfig *CFG;
-					CFGF.Read( "ghost.cfg");
+					CFGF.Read( CONFIGDIR + "ghost.cfg");
 					CFG = &CFGF;
 
 					string var = CFG->GetString(Payload, "xxxxx");
@@ -5110,7 +5110,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					}
 
 					// read config file
-					std::ifstream myfile ("ghost.cfg");
+					std::ifstream myfile (CONFIGDIR + "ghost.cfg");
 					if (myfile.is_open())
 					{
 						while (! myfile.eof() )
@@ -5217,7 +5217,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 /*
 					CConfig CFGF;
 					CConfig *CFG;
-					CFGF.Read( "ghost.cfg");
+					CFGF.Read( CONFIGDIR + "ghost.cfg");
 					CFG = &CFGF;
 
 					string var = CFG->GetString(VarName, "xxxxx");
@@ -5239,7 +5239,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					bool commentfound = false;
 
 // reading the old config file and replacing the variable if it exists
-					std::ifstream myfile ("ghost.cfg");
+					std::ifstream myfile (CONFIGDIR + "ghost.cfg");
 					if (myfile.is_open())
 					{
 						while (! myfile.eof() )
@@ -5297,7 +5297,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 // writing new config file
 					std::ofstream myfile2;
-					myfile2.open ("ghost.cfg");
+					myfile2.open (CONFIGDIR + "ghost.cfg");
 					for (uint32_t i = 0; i<newcfg.size(); i++)
 					{
 						myfile2 << newcfg[i]+"\n";
@@ -5344,7 +5344,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					/*
 					CConfig CFGF;
 					CConfig *CFG;
-					CFGF.Read( "ghost.cfg");
+					CFGF.Read( CONFIGDIR + "ghost.cfg");
 					CFG = &CFGF;
 
 					string var = CFG->GetString(VarName, "xxxxx");
@@ -5366,7 +5366,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					bool commentfound = false;
 
 					// reading the old config file and replacing the variable if it exists
-					std::ifstream myfile ("ghost.cfg");
+					std::ifstream myfile (CONFIGDIR + "ghost.cfg");
 					if (myfile.is_open())
 					{
 						while (! myfile.eof() )
@@ -5424,7 +5424,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 						// writing new config file
 						std::ofstream myfile2;
-						myfile2.open ("ghost.cfg");
+						myfile2.open (CONFIGDIR + "ghost.cfg");
 						for (uint32_t i = 0; i<newcfg.size(); i++)
 						{
 							myfile2 << newcfg[i]+"\n";

@@ -118,7 +118,7 @@ CGHostDBSQLite :: CGHostDBSQLite( CConfig *CFG ) : CGHostDB( CFG )
 	CONSOLE_Print( "[SQLITE3] version " + string( SQLITE_VERSION ) );
 	CONSOLE_Print( "[SQLITE3] opening database [" + m_File + "]" );
 	
-	string m_localf = "ips.dbs";
+	string m_localf = DBDIR + "ips.dbs";
 	CSQLITE3 * m_local;
 	if (!exists(m_localf))
 	{

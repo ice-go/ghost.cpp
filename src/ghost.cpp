@@ -531,7 +531,7 @@ int main( int argc, char **argv )
 	myfile << "ProcessStatus = Online";
 	myfile.close();
 	CONSOLE_Print(ProcessID);
-	gCFGFile = "ghost.cfg";
+	gCFGFile = CONFIGDIR + "ghost.cfg";
 
 	if( argc > 1 && argv[1] )
 		gCFGFile = argv[1];
@@ -1164,7 +1164,7 @@ CGHost :: CGHost( CConfig *CFG )
 	m_SaveGame = new CSaveGame( );
 
 	// load the iptocountry data
-
+	m_IpToCountryFilePath = CFG->GetString( "bot_iptocountryfilepath", DBDIR + "ip-to-country.csv" );
 	LoadIPToCountryDataOpt();
 
 	// external ip and country
@@ -2252,13 +2252,14 @@ void CGHost :: LoadIPToCountryDataOpt( )
 	bool oldips = true;
 
 	intmax_t file_len;
-	file_len = file_size("ip-to-country.csv");
+	
+	file_len = file_size(m_IpToCountryFilePath);
 
-	if (exists("ips.cfg") && exists("ips.dbs"))
+	if (exists(CONFIGDIR + "ips.cfg") && exists(DBDIR + "ips.dbs"))
 	{
 		string File = "ips.cfg";
 		CConfig CFGH;
-		CFGH.Read( File );
+		CFGH.Read( CONFIGDIR + File );
 		int filelen = CFGH.GetInt( "size", 0 );
 		if (filelen==file_len)
 			oldips = false;
@@ -2267,13 +2268,13 @@ void CGHost :: LoadIPToCountryDataOpt( )
 	if (oldips)
 	{
 		LoadIPToCountryData( );
-		m_DBLocal->RunQuery("ATTACH DATABASE 'ips.dbs' AS ips");
+		m_DBLocal->RunQuery("ATTACH DATABASE '" + DBDIR + "ips.dbs' AS ips");
 		m_DBLocal->RunQuery("DELETE * FROM ips.iptocountry");
 		m_DBLocal->RunQuery("INSERT INTO ips.iptocountry SELECT * FROM iptocountry");
 		m_DBLocal->RunQuery("DETACH DATABASE ips");
 		if (file_len!=0)
 		{
-			string File = "ips.cfg";
+			string File = CONFIGDIR + "ips.cfg";
 			std::ofstream tmpcfg;
 			tmpcfg.open( File.c_str( ), ios :: trunc );
 			int size = (int)file_len;
@@ -2285,7 +2286,7 @@ void CGHost :: LoadIPToCountryDataOpt( )
 	{
 		CONSOLE_Print( "[GHOST] started loading [ips.dbs]" );
 		uint32_t tim = GetTicks();
-		m_DBLocal->RunQuery("ATTACH DATABASE 'ips.dbs' AS ips");
+		m_DBLocal->RunQuery("ATTACH DATABASE '" + DBDIR + "ips.dbs' AS ips");
 		m_DBLocal->RunQuery("INSERT INTO iptocountry SELECT * FROM ips.iptocountry");
 		m_DBLocal->RunQuery("DETACH DATABASE ips");		
 		CONSOLE_Print("[GHOST] iptocountry loading finished in "+UTIL_ToString(GetTicks()-tim)+" ms");
@@ -2295,7 +2296,7 @@ void CGHost :: LoadIPToCountryDataOpt( )
 void CGHost :: LoadIPToCountryData( )
 {
 	std::ifstream in;
-	in.open( "ip-to-country.csv" );
+	in.open(m_IpToCountryFilePath);
 
 	if( in.fail( ) )
 		CONSOLE_Print( "[GHOST] warning - unable to read file [ip-to-country.csv], iptocountry data not loaded" );
@@ -3587,7 +3588,7 @@ void CGHost :: ReloadConfig ()
 {
 	CConfig CFGF;
 	CConfig *CFG;
-	CFGF.Read( "ghost.cfg");
+	CFGF.Read( CONFIGDIR + "ghost.cfg");
 	CFG = &CFGF;
 
 	stringstream SS;
@@ -3859,6 +3860,11 @@ void CGHost :: ReloadConfig ()
 	m_DropVoteTime = CFG->GetInt( "bot_dropvotetime", 30 );
 	m_IPBanning = CFG->GetInt( "bot_ipbanning", 2 );
 	m_Banning = CFG->GetInt( "bot_banning", 1 );
+	m_ProvidersFilePath = CFG->GetString( "bot_providersfilepath", CONFIGDIR + "providers.txt" );
+	m_WelcomeFilePath = CFG->GetString( "bot_welcomefilepath", CONFIGDIR + "welcome.txt" );
+	m_ChannelWelcomeFilePath = CFG->GetString( "bot_channelwelcomefilepath", CONFIGDIR + "channelwelcome.txt" );
+	m_MarsFilePath = CFG->GetString( "bot_marsfilepath", CONFIGDIR + "mars.txt" );
+
 	ReadProviders();
 	size_t f;
 	providersn.clear();
@@ -3879,7 +3885,7 @@ void CGHost :: ReloadConfig ()
 
 void CGHost :: ReadChannelWelcome ()
 {
-	string file = "channelwelcome.txt";
+	string file = m_ChannelWelcomeFilePath;
 	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_ChannelWelcome.clear();
@@ -3906,7 +3912,7 @@ void CGHost :: ReadChannelWelcome ()
 
 void CGHost :: ReadProviders ()
 {
-	string file = "providers.txt";
+	string file = m_ProvidersFilePath;
 	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Providers.clear();
@@ -3933,7 +3939,7 @@ void CGHost :: ReadProviders ()
 
 void CGHost :: ReadWelcome ()
 {
-	string file = "welcome.txt";
+	string file = m_WelcomeFilePath;
 	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Welcome.clear();
@@ -3987,7 +3993,7 @@ string CGHost :: GetMars ()
 
 void CGHost :: ReadMars ()
 {
-	string file = "mars.txt";
+	string file = m_MarsFilePath;
 	std::ifstream in;
 	in.open( file.c_str( ) );
 	m_Mars.clear();
@@ -4364,7 +4370,7 @@ uint32_t CGHost :: CMDAccessAllOwner ()
 
 void CGHost :: SaveHostCounter()
 {
-	string File = "hostcounter.cfg";
+	string File = CONFIGDIR + "hostcounter.cfg";
 	std::ofstream tmpcfg;
 	tmpcfg.open( File.c_str( ), ios :: trunc );
 	tmpcfg << "hostcounter = " << UTIL_ToString(m_HostCounter) << endl;
@@ -4373,7 +4379,7 @@ void CGHost :: SaveHostCounter()
 
 void CGHost :: LoadHostCounter()
 {
-	string File = "hostcounter.cfg";
+	string File = CONFIGDIR + "hostcounter.cfg";
 	CConfig CFGH;
 	CFGH.Read( File );
 	m_HostCounter = CFGH.GetInt( "hostcounter", 1 );

@@ -25,6 +25,8 @@
 #include "config.h"
 #include "ghostdb.h"
 
+const string CONFIGDIR = "./config/";
+const string DBDIR = "./db/";
 //
 // CGHost
 //
@@ -354,6 +356,11 @@ public:
 	uint32_t m_LobbyTimeLimit;
 	uint32_t m_LobbyTimeLimitMax;
 //	bool m_dbopen;
+	string m_IpToCountryFilePath;
+	string m_ProvidersFilePath;
+	string m_WelcomeFilePath;
+	string m_ChannelWelcomeFilePath;
+	string m_MarsFilePath;
 
 	CGHost( CConfig *CFG );
 	~CGHost( );

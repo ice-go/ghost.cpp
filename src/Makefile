@@ -37,6 +37,8 @@ all: $(OBJS) $(COBJS) $(PROGS)
 ./ghost++: $(OBJS) $(COBJS)
 	$(C++) -o ./ghost++ $(OBJS) $(COBJS) $(LFLAGS)
 
+install:
+	cp $(PROGS) ../
 clean:
 	rm -f $(OBJS) $(COBJS) $(PROGS)
 
