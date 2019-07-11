@@ -3410,7 +3410,7 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 // recalculate nr of players in each team + difference in players nr.
 	
 	ReCalculateTeams();
-
+	string PlayerColor = IsColored( Player->GetName( ) );
 	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 	{
 		if( !(*i)->GetLeftMessageSent( ) && *i != Player )
@@ -3420,17 +3420,17 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 			if( (*i)->GetSocket( ) )
 			{
 				if( m_GHost->m_HideIPAddresses )
-					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), Player->GetName( ), BlankIP, BlankIP ) );
+					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), PlayerColor + Player->GetName( ), BlankIP, BlankIP ) );
 				else
-					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), Player->GetName( ), Player->GetExternalIP( ), Player->GetInternalIP( ) ) );
+					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), PlayerColor + Player->GetName( ), Player->GetExternalIP( ), Player->GetInternalIP( ) ) );
 			}
 
 			// send info about every other player to the new player
 
 			if( m_GHost->m_HideIPAddresses )
-				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), (*i)->GetName( ), BlankIP, BlankIP ) );
+				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), IsColored( (*i)->GetName( ) ) + (*i)->GetName( ), BlankIP, BlankIP ) );
 			else
-				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), (*i)->GetName( ), (*i)->GetExternalIP( ), (*i)->GetInternalIP( ) ) );
+				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), IsColored( (*i)->GetName( ) ) + (*i)->GetName( ), (*i)->GetExternalIP( ), (*i)->GetInternalIP( ) ) );
 		}
 	}
 
@@ -4095,7 +4095,7 @@ void CBaseGame :: EventPlayerJoinedWithScore( CPotentialPlayer *potential, CInco
 // recalculate nr of players in each team + difference in players nr.
 	
 	ReCalculateTeams();
-
+	string PlayerColor = IsColored( Player->GetName( ) );
 	for( vector<CGamePlayer *> :: iterator i = m_Players.begin( ); i != m_Players.end( ); i++ )
 	{
 		if( !(*i)->GetLeftMessageSent( ) && *i != Player )
@@ -4105,17 +4105,17 @@ void CBaseGame :: EventPlayerJoinedWithScore( CPotentialPlayer *potential, CInco
 			if( (*i)->GetSocket( ) )
 			{
 				if( m_GHost->m_HideIPAddresses )
-					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), Player->GetName( ), BlankIP, BlankIP ) );
+					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), PlayerColor + Player->GetName( ), BlankIP, BlankIP ) );
 				else
-					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), Player->GetName( ), Player->GetExternalIP( ), Player->GetInternalIP( ) ) );
+					(*i)->Send( m_Protocol->SEND_W3GS_PLAYERINFO( Player->GetPID( ), PlayerColor + Player->GetName( ), Player->GetExternalIP( ), Player->GetInternalIP( ) ) );
 			}
 
 			// send info about every other player to the new player
 
 			if( m_GHost->m_HideIPAddresses )
-				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), (*i)->GetName( ), BlankIP, BlankIP ) );
+				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), IsColored( (*i)->GetName( ) ) + (*i)->GetName( ), BlankIP, BlankIP ) );
 			else
-				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), (*i)->GetName( ), (*i)->GetExternalIP( ), (*i)->GetInternalIP( ) ) );
+				Player->Send( m_Protocol->SEND_W3GS_PLAYERINFO( (*i)->GetPID( ), IsColored( (*i)->GetName( ) ) + (*i)->GetName( ), (*i)->GetExternalIP( ), (*i)->GetInternalIP( ) ) );
 		}
 	}
 
@@ -7902,6 +7902,18 @@ bool CBaseGame :: IsSafe( string name )
 			break;
 	}
 	return safe;	
+}
+
+string CBaseGame :: IsColored( string name )
+{
+	string color;
+	for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+	{
+		color = (*i)->IsColored(name);
+		if (!color.empty())
+			return color;
+	}
+	return string();	
 }
 
 string CBaseGame :: Voucher( string name )

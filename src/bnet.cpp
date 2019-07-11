@@ -65,6 +65,7 @@ CBNET :: CBNET( CGHost *nGHost, string nServer, string nServerAlias, string nBNL
 	m_CallableAccessesList = m_GHost->m_DB->ThreadedAccessesList( nServer );
 	m_CallableSafeList = m_GHost->m_DB->ThreadedSafeList( nServer );
 	m_CallableSafeListV = m_GHost->m_DB->ThreadedSafeListV( nServer );
+	m_CallablePlayerColorList = m_GHost->m_DB->ThreadedPlayerColorList( nServer );
 	m_CallableNotes = m_GHost->m_DB->ThreadedNotes( nServer );
 	m_CallableNotesN = m_GHost->m_DB->ThreadedNotesN( nServer );
 	m_CallableTodayGamesCount = m_GHost->m_DB->ThreadedTodayGamesCount();
@@ -140,6 +141,7 @@ CBNET :: CBNET( CGHost *nGHost, string nServer, string nServerAlias, string nBNL
 	m_LastOutPacketTicks2 = 0;
 	m_LastOutPacketSize = 0;
 	m_LastAdminRefreshTime = GetTime( );
+	m_LastPlayerColorRefreshTime = GetTime( );
 	m_LastBanRefreshTime = GetTime( );
 	m_LastGameCountRefreshTime = GetTime( );
 	m_FirstConnect = true;
@@ -160,6 +162,8 @@ CBNET :: CBNET( CGHost *nGHost, string nServer, string nServerAlias, string nBNL
 	m_HoldFriends = nHoldFriends;
 	m_HoldClan = nHoldClan;
 	m_PublicCommands = nPublicCommands;
+	m_RemoveTempPlayerColor = true;
+	m_LastTmpPlayerColorDelTime = GetTicks();
 }
 
 CBNET :: ~CBNET( )
@@ -203,6 +207,12 @@ CBNET :: ~CBNET( )
 	for( vector<PairedSafeRemove> :: iterator i = m_PairedSafeRemoves.begin( ); i != m_PairedSafeRemoves.end( ); i++ )
 		m_GHost->m_Callables.push_back( i->second );
 
+	for( vector<PairedPlayerColorAdd> :: iterator i = m_PairedPlayerColorAdds.begin( ); i != m_PairedPlayerColorAdds.end( ); i++ )
+		m_GHost->m_Callables.push_back( i->second );
+
+	for( vector<PairedPlayerColorRemove> :: iterator i = m_PairedPlayerColorRemoves.begin( ); i != m_PairedPlayerColorRemoves.end( ); i++ )
+		m_GHost->m_Callables.push_back( i->second );
+
 	for( vector<PairedRunQuery> :: iterator i = m_PairedRunQueries.begin( ); i != m_PairedRunQueries.end( ); i++ )
 		m_GHost->m_Callables.push_back( i->second );
 
@@ -226,6 +236,9 @@ CBNET :: ~CBNET( )
 
 	if( m_CallableSafeList )
 		m_GHost->m_Callables.push_back( m_CallableSafeList );
+
+	if( m_CallablePlayerColorList )
+		m_GHost->m_Callables.push_back( m_CallablePlayerColorList );
 
 	if( m_CallableAccessesList )
 		m_GHost->m_Callables.push_back( m_CallableAccessesList );
@@ -396,6 +409,46 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_GHost->m_DB->RecoverCallable( i->second );
 			delete i->second;
 			i = m_PairedSafeRemoves.erase( i );
+		}
+		else
+			i++;
+	}
+
+	for( vector<PairedPlayerColorAdd> :: iterator i = m_PairedPlayerColorAdds.begin( ); i != m_PairedPlayerColorAdds.end( ); )
+	{
+		if( i->second->GetReady( ) )
+		{
+			if( i->second->GetResult( ) )
+			{
+				AddColor( i->second->GetUser( ), i->second->GetColor( ) );
+				QueueChatCommand("Added new color [" + i->second->GetColor( ) + "] for user [" + i->second->GetUser( ) + "]", i->first, !i->first.empty( ));
+			}
+			else
+				QueueChatCommand("Error adding color for user [" + i->second->GetUser( ) + "]", i->first, !i->first.empty( ));
+
+			m_GHost->m_DB->RecoverCallable( i->second );
+			delete i->second;
+			i = m_PairedPlayerColorAdds.erase( i );
+		}
+		else
+			i++;
+	}
+
+	for( vector<PairedPlayerColorRemove> :: iterator i = m_PairedPlayerColorRemoves.begin( ); i != m_PairedPlayerColorRemoves.end( ); )
+	{
+		if( i->second->GetReady( ) )
+		{
+			if( i->second->GetResult( ) )
+			{
+				RemoveColor( i->second->GetUser() );
+				QueueChatCommand("Removing color from user [" + i->second->GetUser( ) + "]", i->first, !i->first.empty( ));
+			}
+			else
+				QueueChatCommand("Error removing color from user [" + i->second->GetUser( ) + "]", i->first, !i->first.empty( ));
+
+			m_GHost->m_DB->RecoverCallable( i->second );
+			delete i->second;
+			i = m_PairedPlayerColorRemoves.erase( i );
 		}
 		else
 			i++;
@@ -645,6 +698,18 @@ bool CBNET :: Update( void *fd, void *send_fd )
 				CONSOLE_Print("[BNET: " + m_ServerAlias + "] Removed "+ Forgiven+"'s ban");
 			}
 
+	//remove temp PlayerColor every 6 hour	
+	if( GetLoggedIn())
+		if(GetTicks()-m_LastTmpPlayerColorDelTime > 1000*3600*6 || m_RemoveTempPlayerColor)
+		{
+			uint32_t Count = m_GHost->m_DB->RemoveTempPlayerColorList( m_Server);
+			string mess = "Removed "+ UTIL_ToString(Count) +" temporary player color which expire today";
+			CONSOLE_Print("[BNET: " + m_ServerAlias + "] "+mess);
+			m_RemoveTempPlayerColor = false;
+			m_LastTmpPlayerColorDelTime = GetTicks();
+			
+		}
+
 	// refresh friends list every 5 minutes
 	if (GetTime()>= m_LastFriendListTime + 300)
 	{
@@ -681,6 +746,11 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		m_CallableSafeListV = m_GHost->m_DB->ThreadedSafeListV( m_Server );
 	}
 
+	// refresh the PlayerColor list every specifed minutes at bot_colourrefresh
+
+	if( !m_CallablePlayerColorList && GetTime() >= m_LastPlayerColorRefreshTime + m_GHost->m_ColorRefreshTime * 60)
+		m_CallablePlayerColorList = m_GHost->m_DB->ThreadedPlayerColorList( m_Server );
+
 	if( m_CallableAdminList && m_CallableAdminList->GetReady( ) )
 	{
 //		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] refreshed admin list (" + UTIL_ToString( m_Admins.size( ) ) + " -> " + UTIL_ToString( m_CallableAdminList->GetResult( ).size( ) ) + " admins)" );
@@ -709,6 +779,16 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		m_CallableSafeList = NULL;
 	}
 
+	if( m_CallablePlayerColorList && m_CallablePlayerColorList->GetReady( ) )
+         
+		{
+        // CONSOLE_Print( "[BNET: " + m_ServerAlias + "] refreshed player color list (" + UTIL_ToString( m_PlayerColor.size( ) ) + " -> " + UTIL_ToString(                m_CallablePlayerColorList->GetResult( ).size( ) ) + " playercolor listed)" );
+        m_PlayerColor = m_CallablePlayerColorList->GetResult( );
+        m_GHost->m_DB->RecoverCallable( m_CallablePlayerColorList );
+        delete m_CallablePlayerColorList;
+        m_CallablePlayerColorList = NULL;
+		m_LastPlayerColorRefreshTime = GetTime( );
+    }
 	if( m_CallableSafeListV && m_CallableSafeListV->GetReady( ) )
 	{
 		// CONSOLE_Print( "[BNET: " + m_ServerAlias + "] refreshed safe list vouchers (" + UTIL_ToString( m_Safe.size( ) ) + " -> " + UTIL_ToString( m_CallableSafeList->GetResult( ).size( ) ) + " safe listed)" );
@@ -1764,6 +1844,100 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						m_PairedSafeRemoves.push_back( PairedSafeRemove( Usr, m_GHost->m_DB->ThreadedSafeRemove( m_Server, nam ) ) );
 				}
 
+				//
+				// !CHECKCOLOR
+				//
+
+				if( ( Command == "checkcolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+				{
+					string srv = GetServer();
+					string nam = Payload;
+					string pnam = GetPlayerFromNamePartial(Payload);
+					if (!pnam.empty())
+						nam = pnam;
+					string colored;
+					colored = IsColored( nam);
+
+					if (colored.empty())
+						QueueChatCommand("User [" + nam + "] don't have color.", User, Whisper);
+					else
+						QueueChatCommand("User [" + nam + "] have color [" + colored + "]", User, Whisper);
+
+				}
+
+				// 
+				// !ADDCOLOR
+				//
+
+				if( ( Command == "addcolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+				{
+					string srv = GetServer();
+					string nam;
+					string color;
+					uint32_t expiradate = 0;
+					stringstream SS;
+
+					SS << Payload;
+					SS >> nam;
+					SS >> color;
+					SS >> expiradate;
+
+					string pnam = GetPlayerFromNamePartial(nam);
+					if (!pnam.empty())
+						nam = pnam;
+
+					if( color.empty() )
+						color = "000000";
+
+					if( expiradate <= 0 || SS.fail())
+						expiradate = 30;
+
+					string Usr;
+					Usr = Whisper ? User : string( );
+					if (m_GHost->m_WhisperAllMessages)
+						Usr = User;
+
+					string colored;
+					colored = IsColored( nam);
+
+					if (!colored.empty())
+					{
+						AddColor( nam, color );
+						m_GHost->m_Callables.push_back(m_GHost->m_DB->ThreadedPlayerColorUpdate( m_Server, nam, color, expiradate ));
+						QueueChatCommand("Refresh nick for user ["+nam+"] with new value - "+color, User, Whisper);
+					}
+					else
+						m_PairedPlayerColorAdds.push_back( PairedPlayerColorAdd( Usr, m_GHost->m_DB->ThreadedPlayerColorAdd( m_Server, nam, color, expiradate ) ) );
+
+					//m_UpdatePlayerColor = true;
+				}
+
+				//
+				// !REMOVECOLOR
+				//
+
+				if( ( Command == "removecolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+				{
+					string srv = GetServer();
+					string nam = Payload;
+					string pnam = GetPlayerFromNamePartial(Payload);
+					if (!pnam.empty())
+						nam = pnam;
+
+					string Usr;
+					Usr = Whisper ? User : string( );
+					if (m_GHost->m_WhisperAllMessages)
+						Usr = User;
+
+					string colored;
+					colored = IsColored( nam);
+					if (colored.empty())
+						QueueChatCommand("Player ["+nam+" don't have colored nick." , User, Whisper);
+					else
+						m_PairedPlayerColorRemoves.push_back( PairedPlayerColorRemove( Usr, m_GHost->m_DB->ThreadedPlayerColorRemove( m_Server, nam ) ) );
+
+					//m_UpdatePlayerColor = true;
+				}
 
 				//
 				// !CD
@@ -6235,6 +6409,50 @@ bool CBNET :: IsSafe( string name )
 		}
 	}
 	return false;
+}
+
+string CBNET :: IsColored( string name )
+{
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+
+	for( vector<pair< string, string> > :: iterator i = m_PlayerColor.begin( ); i != m_PlayerColor.end( ); i++ )
+	{
+		if( i->first == name )
+		{
+			return i->second;
+		}
+	}
+	return string();
+}
+
+void CBNET :: AddColor( string name, string color )
+{
+	bool update = false;
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+	for( vector<pair< string, string> > :: iterator i = m_PlayerColor.begin( ); i != m_PlayerColor.end( ); i++ )
+	{
+		if( i->first == name )
+		{
+			i->second = color;
+			update = true;
+		}
+	}
+	if(!update)
+		m_PlayerColor.push_back( make_pair( name, color ) );
+}
+
+void CBNET :: RemoveColor( string name )
+{
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+
+	for( uint32_t i = 0; i != m_PlayerColor.size( ); i++)
+	{
+		if (m_PlayerColor[i].first==name)
+		{
+			m_PlayerColor.erase(m_PlayerColor.begin()+i);
+			break;
+		}
+	}
 }
 
 string CBNET :: Voucher( string name )

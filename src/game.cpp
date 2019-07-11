@@ -258,6 +258,12 @@ CGame :: ~CGame( )
 	for( vector<PairedSafeRemove> :: iterator i = m_PairedSafeRemoves.begin( ); i != m_PairedSafeRemoves.end( ); i++ )
 		m_GHost->m_Callables.push_back( i->second );
 
+	for( vector<PairedPlayerColorAdd> :: iterator i = m_PairedPlayerColorAdds.begin( ); i != m_PairedPlayerColorAdds.end( ); i++ )
+		m_GHost->m_Callables.push_back( i->second );
+
+	for( vector<PairedPlayerColorRemove> :: iterator i = m_PairedPlayerColorRemoves.begin( ); i != m_PairedPlayerColorRemoves.end( ); i++ )
+		m_GHost->m_Callables.push_back( i->second );
+
 	for( vector<PairedGPSCheck> :: iterator i = m_PairedGPSChecks.begin( ); i != m_PairedGPSChecks.end( ); i++ )
 		m_GHost->m_Callables.push_back( i->second );
 
@@ -490,6 +496,52 @@ bool CGame :: Update( void *fd, void *send_fd )
 			m_GHost->m_DB->RecoverCallable( i->second );
 			delete i->second;
 			i = m_PairedSafeRemoves.erase( i );
+		}
+		else
+			i++;
+	}
+
+	for( vector<PairedPlayerColorAdd> :: iterator i = m_PairedPlayerColorAdds.begin( ); i != m_PairedPlayerColorAdds.end( ); )
+	{
+		if( i->second->GetReady( ) )
+		{
+			if( i->second->GetResult( ) )
+			{
+				for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+				{
+					if( (*j)->GetServer( ) == i->second->GetServer( ) )
+						(*j)->AddColor( i->second->GetUser( ), i->second->GetColor( ) );
+				}
+				SendAllChat("Added new color [" + i->second->GetColor( ) + "] for user [" + i->second->GetUser( ) + "]");
+			} else
+				SendAllChat("Error adding color for user ["+i->second->GetUser( )+"]");
+
+			m_GHost->m_DB->RecoverCallable( i->second );
+			delete i->second;
+			i = m_PairedPlayerColorAdds.erase( i );
+		}
+		else
+			i++;
+	}
+
+	for( vector<PairedPlayerColorRemove> :: iterator i = m_PairedPlayerColorRemoves.begin( ); i != m_PairedPlayerColorRemoves.end( ); )
+	{
+		if( i->second->GetReady( ) )
+		{
+			if( i->second->GetResult( ) )
+			{
+				for( vector<CBNET *> :: iterator j = m_GHost->m_BNETs.begin( ); j != m_GHost->m_BNETs.end( ); j++ )
+				{
+					if( (*j)->GetServer( ) == i->second->GetServer( ) )
+						(*j)->RemoveColor( i->second->GetUser( ));
+				}
+				SendAllChat("Removing color from user [" + i->second->GetUser( ) + "]");
+			} else
+				SendAllChat("Error removing color from user ["+i->second->GetUser( )+"]");
+
+			m_GHost->m_DB->RecoverCallable( i->second );
+			delete i->second;
+			i = m_PairedPlayerColorRemoves.erase( i );
 		}
 		else
 			i++;
@@ -1429,6 +1481,122 @@ bool CGame :: EventPlayerBotCommand( CGamePlayer *player, string command, string
 					if (Matches == 1)
 					LastMatch->SetReserved(false);
 				}
+			}
+
+			//
+			// !CHECKCOLOR
+			//
+
+			if( ( Command == "checkcolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+			{
+				string srv = GetCreatorServer();
+				string nam = Payload;
+
+				CGamePlayer *LastMatch = NULL;
+
+				uint32_t Matches = GetPlayerFromNamePartial( nam , &LastMatch );
+				if( Matches == 1 )
+					nam = LastMatch->GetName();
+
+				string colored;
+				for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+					if( (*i)->GetServer( ) == m_Server)
+					{
+						colored = (*i)->IsColored(nam);
+						break;
+					}
+
+				if (colored.empty())
+					SendAllChat("User [" + nam + "] don't have color.");
+				else
+					SendAllChat("User [" + nam + "] have color [" + colored + "]");
+			}
+
+			//
+			// !ADDCOLOR
+			//
+
+			if( ( Command == "addcolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+			{
+				string srv = GetCreatorServer();
+				string nam;
+				string color;
+				uint32_t expiradate = 0;
+				stringstream SS;
+
+				SS << Payload;
+				SS >> nam;
+				SS >> color;
+				SS >> expiradate;
+
+				CGamePlayer *LastMatch = NULL;
+				uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
+
+				if( Matches == 1 )
+					nam = LastMatch->GetName();
+
+				if( color.empty() )
+					color = "000000";
+
+				if( expiradate <= 0 || SS.fail())
+					expiradate = 30;
+
+				string colored;
+				for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+				{
+					if( (*i)->GetServer( ) == m_Server)
+					{
+						colored = (*i)->IsColored(nam);
+						break;
+					}
+				}
+
+				if (!colored.empty())
+				{
+					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+					{
+						if( (*i)->GetServer( ) == m_Server)
+						{
+							(*i)->AddColor( nam, color );
+							break;
+						}
+					}
+					m_GHost->m_Callables.push_back(m_GHost->m_DB->ThreadedPlayerColorUpdate( m_Server, nam, color, expiradate ));
+					SendAllChat("Refresh nick for user ["+nam+"] with new value - "+color);
+				}
+				else
+					m_PairedPlayerColorAdds.push_back( PairedPlayerColorAdd( User, m_GHost->m_DB->ThreadedPlayerColorAdd( m_Server, nam, color, expiradate ) ) );
+			}
+
+			//
+			// !REMOVECOLOR
+			//
+
+			if( ( Command == "removecolor" ) && !Payload.empty( ) && !m_GHost->m_BNETs.empty( ) )
+			{
+				string srv = GetCreatorServer();
+				string nam = Payload;
+
+				CGamePlayer *LastMatch = NULL;
+				uint32_t Matches = GetPlayerFromNamePartial( Payload , &LastMatch );
+
+				if( Matches == 1 )
+					nam = LastMatch->GetName();
+
+				string colored;
+				for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+				{
+					if( (*i)->GetServer( ) == m_Server)
+					{
+						colored = (*i)->IsColored( nam);
+						break;
+					}
+				}
+
+				if (colored.empty())
+					SendAllChat("Player ["+nam+" don't have colored nick.");
+				else
+					m_PairedPlayerColorRemoves.push_back( PairedPlayerColorRemove( User, m_GHost->m_DB->ThreadedPlayerColorRemove( m_Server, nam ) ) );
 			}
 
 			//

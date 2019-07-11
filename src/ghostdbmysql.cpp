@@ -241,6 +241,58 @@ CCallableSafeList *CGHostDBMySQL :: ThreadedSafeList( string server )
 	return Callable;
 }
 
+CCallablePlayerColorList *CGHostDBMySQL :: ThreadedPlayerColorList( string server )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;
+
+	CCallablePlayerColorList *Callable = new CMySQLCallablePlayerColorList( server, Connection, m_BotID, m_Server, m_Database, m_User, m_Password, m_Port );
+	CreateThread( Callable );
+	m_OutstandingCallables++;
+	return Callable;
+}
+
+CCallablePlayerColorAdd *CGHostDBMySQL :: ThreadedPlayerColorAdd( string server, string user, string color, uint32_t expiredate )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;
+
+	CCallablePlayerColorAdd *Callable = new CMySQLCallablePlayerColorAdd( server, user, color, expiredate, Connection, m_BotID, m_Server, m_Database, m_User, m_Password, m_Port );
+	CreateThread( Callable );
+	m_OutstandingCallables++;
+	return Callable;
+}
+
+CCallablePlayerColorRemove *CGHostDBMySQL :: ThreadedPlayerColorRemove( string server, string user )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;
+
+	CCallablePlayerColorRemove *Callable = new CMySQLCallablePlayerColorRemove( server, user, Connection, m_BotID, m_Server, m_Database, m_User, m_Password, m_Port );
+	CreateThread( Callable );
+	m_OutstandingCallables++;
+	return Callable;
+}
+
+CCallablePlayerColorAdd *CGHostDBMySQL :: ThreadedPlayerColorUpdate( string server, string user, string color, uint32_t expiredate )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;
+
+	CCallablePlayerColorAdd *Callable = new CMySQLCallablePlayerColorUpdate( server, user, color, expiredate, Connection, m_BotID, m_Server, m_Database, m_User, m_Password, m_Port );
+	CreateThread( Callable );
+	m_OutstandingCallables++;
+	return Callable;
+}
+
 CCallableSafeList *CGHostDBMySQL :: ThreadedSafeListV( string server )
 {
 	void *Connection = GetIdleConnection( );
@@ -2187,6 +2239,46 @@ void CMySQLCallableSafeList :: operator( )( )
 	Close( );
 }
 
+void CMySQLCallablePlayerColorList :: operator( )( )
+{
+	Init( );
+
+	if( m_Error.empty( ) )
+		m_Result = MySQLPlayerColorList( m_Connection, &m_Error, m_SQLBotID, m_Server );
+
+	Close( );
+}
+
+void CMySQLCallablePlayerColorAdd :: operator( )( )
+{
+	Init( );
+
+	if( m_Error.empty( ) )
+		m_Result = MySQLPlayerColorAdd( m_Connection, &m_Error, m_SQLBotID, m_Server, m_User, m_Color, m_Expiredate);
+
+	Close( );
+}
+
+void CMySQLCallablePlayerColorRemove :: operator( )( )
+{
+	Init( );
+
+	if( m_Error.empty( ) )
+		m_Result = MySQLPlayerColorRemove( m_Connection, &m_Error, m_SQLBotID, m_Server, m_User );
+
+	Close( );
+}
+
+void CMySQLCallablePlayerColorUpdate :: operator( )( )
+{
+	Init( );
+
+	if( m_Error.empty( ) )
+		m_Result = MySQLPlayerColorUpdate( m_Connection, &m_Error, m_SQLBotID, m_Server, m_User, m_Color, m_Expiredate);
+
+	Close( );
+}
+
 void CMySQLCallableSafeListV :: operator( )( )
 {
 	Init( );
@@ -2658,13 +2750,11 @@ bool MySQLSafeAdd( void *conn, string *error, uint32_t botid, string server, str
 	return Success;
 }
 
-string MySQLNoteCheck( void *conn, string *error, uint32_t botid, string server, string user )
+vector<pair< string, string > > MySQLPlayerColorList( void *conn, string *error, uint32_t botid, string server )
 {
-	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	string EscServer = MySQLEscapeString( conn, server );
-	string EscUser = MySQLEscapeString( conn, user );
-	string Note = string();
-	string Query = "SELECT note FROM notes WHERE server='" + EscServer + "' AND name='" + EscUser + "'";
+	vector<pair< string, string > > ColorList;
+	string Query = "SELECT name, color FROM player_color WHERE server='" + EscServer + "'";
 
 	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
 		*error = mysql_error( (MYSQL *)conn );
@@ -2676,8 +2766,11 @@ string MySQLNoteCheck( void *conn, string *error, uint32_t botid, string server,
 		{
 			vector<string> Row = MySQLFetchRow( Result );
 
-			if( !Row.empty( ) )
-				Note = (Row)[0];
+			while( !Row.empty( ) )
+			{
+				ColorList.push_back( make_pair( Row[0], Row[1] ) );
+				Row = MySQLFetchRow( Result );
+			}
 
 			mysql_free_result( Result );
 		}
@@ -2685,7 +2778,122 @@ string MySQLNoteCheck( void *conn, string *error, uint32_t botid, string server,
 			*error = mysql_error( (MYSQL *)conn );
 	}
 
-	return Note;
+	return ColorList;
+}
+
+bool MySQLPlayerColorAdd( void *conn, string *error, uint32_t botid, string server, string user, string color, uint32_t expiredate )
+{
+	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
+	transform( color.begin( ), color.end( ), color.begin( ), (int(*)(int))tolower );
+	string EscServer = MySQLEscapeString( conn, server );
+	string EscUser = MySQLEscapeString( conn, user );
+	string EscColor = "|cff" + MySQLEscapeString( conn, color );
+	string EscExpireDate = MySQLEscapeString( conn, UTIL_ToString(expiredate) );
+	bool Success = false;
+	string Query = "INSERT INTO player_color ( server, name, color, expiredate ) VALUES ( '" + EscServer + "', '" + EscUser + "', '" + EscColor +"', DATE_ADD(CURDATE(), INTERVAL "+EscExpireDate +" DAY) )";
+
+	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
+		*error = mysql_error( (MYSQL *)conn );
+	else
+		Success = true;
+
+	return Success;
+}
+
+bool MySQLPlayerColorRemove( void *conn, string *error, uint32_t botid, string server, string user )
+{
+	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
+	string EscServer = MySQLEscapeString( conn, server );
+	string EscUser = MySQLEscapeString( conn, user );
+	bool Success = false;
+	string Query = "DELETE FROM player_color WHERE server='" + EscServer + "' AND name='" + EscUser + "'";
+
+	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
+		*error = mysql_error( (MYSQL *)conn );
+	else
+	{
+		uint32_t rows = (uint32_t) mysql_affected_rows((MYSQL *)conn);
+		if (rows>0)
+			Success = true;
+	}
+
+	return Success;
+}
+
+bool MySQLPlayerColorUpdate( void *conn, string *error, uint32_t botid, string server, string user, string color, uint32_t expiredate )
+{
+	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
+	transform( color.begin( ), color.end( ), color.begin( ), (int(*)(int))tolower );
+	string EscServer = MySQLEscapeString( conn, server );
+	string EscUser = MySQLEscapeString( conn, user );
+	string EscColor = "|cff" + MySQLEscapeString( conn, color );
+	//string EscExpireDate = MySQLEscapeString( conn, UTIL_ToString(expiredate) );
+	bool Success = false;
+	string Query = "UPDATE player_color SET color='" + EscColor + "' WHERE name='" + EscUser + "' AND server='"+ EscServer + "'";
+	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
+		*error = mysql_error( (MYSQL *)conn );
+	else
+		Success = true;
+
+	return Success;
+}
+
+uint32_t MySQLPlayerColorRemoveTemp( void *conn, string *error, uint32_t botid, string server )
+{
+	string EscServer = MySQLEscapeString( conn, server );
+	uint32_t Count = 0;
+	string Query = "DELETE FROM player_color WHERE server='" + EscServer + "' AND expiredate <= CURDATE() AND expiredate != ''";
+
+	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
+		*error = mysql_error( (MYSQL *)conn );
+	else
+	{
+		uint32_t rows = (uint32_t) mysql_affected_rows((MYSQL *)conn);
+		Count = rows;
+	}
+
+	return Count;
+}
+
+uint32_t CGHostDBMySQL :: RemoveTempPlayerColorList( string server )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;	
+
+	if( !Connection )
+	{
+		if( !( Connection = mysql_init( NULL ) ) )
+			m_Error = mysql_error( (MYSQL *)Connection );
+
+		my_bool Reconnect = true;
+		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+
+		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
+			m_Error = mysql_error( (MYSQL *)Connection );
+	}
+	else if( mysql_ping( (MYSQL *)Connection ) != 0 )
+		m_Error = mysql_error( (MYSQL *)Connection );
+	if (m_Error!="")
+		return 0;
+
+	string error=string();
+
+	uint32_t result = MySQLPlayerColorRemoveTemp(Connection, &error, m_BotID, server);
+
+	if( !error.empty( ) )
+		CONSOLE_Print( "[MYSQL] error --- " + error );
+
+	if( m_IdleConnections.size( ) > m_MaxConnections )
+	{
+		mysql_close( (MYSQL *)Connection );
+		m_NumConnections--;
+	}
+	else
+		m_IdleConnections.push( Connection );
+
+	return result;
 }
 
 bool MySQLNoteAdd( void *conn, string *error, uint32_t botid, string server, string user, string note )
@@ -3890,6 +4098,17 @@ void CGHostDBMySQL :: CreateSafeListTable( void *conn, string *error )
 {
 	bool Success = false;
 	string Query = "CREATE TABLE safelist ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, server VARCHAR(100) NOT NULL, name VARCHAR(15) NOT NULL, voucher VARCHAR(15) DEFAULT '' NOT NULL)";
+
+	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
+		*error = mysql_error( (MYSQL *)conn );
+	else
+		Success = true;
+}
+
+void CGHostDBMySQL :: CreatePlayerColorTable( void *conn, string *error )
+{
+	bool Success = false;
+	string Query = "CREATE TABLE player_color ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, server VARCHAR(100) NOT NULL, name VARCHAR(5) NOT NULL, color VARCHAR(10) DEFAULT '' NOT NULL, expiredate VARCHAR(31) DEFAULT '' NOT NULL)";
 
 	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
 		*error = mysql_error( (MYSQL *)conn );

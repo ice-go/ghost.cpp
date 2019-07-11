@@ -202,6 +202,10 @@ public:
 	virtual CCallableRanks *ThreadedRanks( string server);
 	virtual CCallableSafeAdd *ThreadedSafeAdd( string server, string user, string voucher );
 	virtual CCallableSafeRemove *ThreadedSafeRemove( string server, string user );
+	virtual CCallablePlayerColorList *ThreadedPlayerColorList( string server );
+	virtual CCallablePlayerColorAdd *ThreadedPlayerColorAdd( string server, string user, string color, uint32_t expiredate );
+	virtual CCallablePlayerColorAdd *ThreadedPlayerColorUpdate( string server, string user, string color, uint32_t expiredate );
+	virtual CCallablePlayerColorRemove *ThreadedPlayerColorRemove( string server, string user );
 	virtual CCallableNoteAdd *ThreadedNoteUpdate( string server, string user, string note );
 	virtual CCallableNoteAdd *ThreadedNoteAdd( string server, string user, string note );
 	virtual CCallableNoteRemove *ThreadedNoteRemove( string server, string user );
@@ -260,12 +264,14 @@ public:
 	uint32_t RemoveTempBans( string server );
 	vector<string> RemoveTempBanList( string server );
 	vector<string> RemoveBanListDay( string server, uint32_t day );
+	uint32_t RemoveTempPlayerColorList( string server );
 	bool BanUpdate( string user, string ip);
 	string RunQuery( string query);
 	bool WarnUpdate( string user, uint32_t before, uint32_t after );
 	bool WarnForget( string name, uint32_t gamethreshold );
 	uint32_t ScoresCount(  string server);
 	void CreateSafeListTable( void *conn, string *error );
+	void CreatePlayerColorTable( void *conn, string *error );
 	void CreateNotesTable( void *conn, string *error );
 	void UpgradeAdminTable( void *conn, string *error );
 };
@@ -313,6 +319,11 @@ string MySQLWarnReasonsCheck( void *conn, string *error, uint32_t botid, string 
 bool MySQLSafeCheck( void *conn, string *error, uint32_t botid, string server, string user );
 bool MySQLSafeAdd( void *conn, string *error, uint32_t botid, string server, string user, string voucher );
 bool MySQLSafeRemove( void *conn, string *error, uint32_t botid, string server, string user );
+vector<pair<string, string> > MySQLPlayerColorList( void *conn, string *error, uint32_t botid, string server );
+bool MySQLPlayerColorAdd( void *conn, string *error, uint32_t botid, string server, string user, string color, uint32_t expiredate );
+bool MySQLPlayerColorRemove( void *conn, string *error, uint32_t botid, string server, string user );
+bool MySQLPlayerColorUpdate( void *conn, string *error, uint32_t botid, string server, string user, string color, uint32_t expiredate );
+uint32_t MySQLPlayerColorRemoveTemp( void *conn, string *error, uint32_t botid, string server );
 bool MySQLNoteAdd( void *conn, string *error, uint32_t botid, string server, string user, string note );
 bool MySQLNoteUpdate( void *conn, string *error, uint32_t botid, string server, string user, string note );
 bool MySQLNoteRemove( void *conn, string *error, uint32_t botid, string server, string user );
@@ -423,6 +434,50 @@ class CMySQLCallableSafeList : public CCallableSafeList, public CMySQLCallable
 public:
 	CMySQLCallableSafeList( string nServer, void *nConnection, uint32_t nSQLBotID, string nSQLServer, string nSQLDatabase, string nSQLUser, string nSQLPassword, uint16_t nSQLPort ) : CBaseCallable( ), CCallableSafeList( nServer ), CMySQLCallable( nConnection, nSQLBotID, nSQLServer, nSQLDatabase, nSQLUser, nSQLPassword, nSQLPort ) { }
 	virtual ~CMySQLCallableSafeList( ) { }
+
+	virtual void operator( )( );
+	virtual void Init( ) { CMySQLCallable :: Init( ); }
+	virtual void Close( ) { CMySQLCallable :: Close( ); }
+};
+
+class CMySQLCallablePlayerColorList : public CCallablePlayerColorList, public CMySQLCallable
+{
+public:
+	CMySQLCallablePlayerColorList( string nServer, void *nConnection, uint32_t nSQLBotID, string nSQLServer, string nSQLDatabase, string nSQLUser, string nSQLPassword, uint16_t nSQLPort ) : CBaseCallable( ), CCallablePlayerColorList( nServer ), CMySQLCallable( nConnection, nSQLBotID, nSQLServer, nSQLDatabase, nSQLUser, nSQLPassword, nSQLPort ) { }
+	virtual ~CMySQLCallablePlayerColorList( ) { }
+
+	virtual void operator( )( );
+	virtual void Init( ) { CMySQLCallable :: Init( ); }
+	virtual void Close( ) { CMySQLCallable :: Close( ); }
+};
+
+class CMySQLCallablePlayerColorAdd : public CCallablePlayerColorAdd, public CMySQLCallable
+{
+public:
+	CMySQLCallablePlayerColorAdd( string nServer, string nUser, string nColor, uint32_t nExpiredate, void *nConnection, uint32_t nSQLBotID, string nSQLServer, string nSQLDatabase, string nSQLUser, string nSQLPassword, uint16_t nSQLPort ) : CBaseCallable( ), CCallablePlayerColorAdd( nServer, nUser, nColor, nExpiredate ), CMySQLCallable( nConnection, nSQLBotID, nSQLServer, nSQLDatabase, nSQLUser, nSQLPassword, nSQLPort ) { }
+	virtual ~CMySQLCallablePlayerColorAdd( ) { }
+
+	virtual void operator( )( );
+	virtual void Init( ) { CMySQLCallable :: Init( ); }
+	virtual void Close( ) { CMySQLCallable :: Close( ); }
+};
+
+class CMySQLCallablePlayerColorRemove : public CCallablePlayerColorRemove, public CMySQLCallable
+{
+public:
+	CMySQLCallablePlayerColorRemove( string nServer, string nUser, void *nConnection, uint32_t nSQLBotID, string nSQLServer, string nSQLDatabase, string nSQLUser, string nSQLPassword, uint16_t nSQLPort ) : CBaseCallable( ), CCallablePlayerColorRemove( nServer, nUser ), CMySQLCallable( nConnection, nSQLBotID, nSQLServer, nSQLDatabase, nSQLUser, nSQLPassword, nSQLPort ) { }
+	virtual ~CMySQLCallablePlayerColorRemove( ) { }
+
+	virtual void operator( )( );
+	virtual void Init( ) { CMySQLCallable :: Init( ); }
+	virtual void Close( ) { CMySQLCallable :: Close( ); }
+};
+
+class CMySQLCallablePlayerColorUpdate : public CCallablePlayerColorAdd, public CMySQLCallable
+{
+public:
+	CMySQLCallablePlayerColorUpdate( string nServer, string nUser, string nColor, uint32_t nExpiredate, void *nConnection, uint32_t nSQLBotID, string nSQLServer, string nSQLDatabase, string nSQLUser, string nSQLPassword, uint16_t nSQLPort ) : CBaseCallable( ), CCallablePlayerColorAdd( nServer, nUser, nColor, nExpiredate ), CMySQLCallable( nConnection, nSQLBotID, nSQLServer, nSQLDatabase, nSQLUser, nSQLPassword, nSQLPort ) { }
+	virtual ~CMySQLCallablePlayerColorUpdate( ) { }
 
 	virtual void operator( )( );
 	virtual void Init( ) { CMySQLCallable :: Init( ); }

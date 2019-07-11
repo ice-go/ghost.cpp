@@ -3864,6 +3864,7 @@ void CGHost :: ReloadConfig ()
 	m_WelcomeFilePath = CFG->GetString( "bot_welcomefilepath", CONFIGDIR + "welcome.txt" );
 	m_ChannelWelcomeFilePath = CFG->GetString( "bot_channelwelcomefilepath", CONFIGDIR + "channelwelcome.txt" );
 	m_MarsFilePath = CFG->GetString( "bot_marsfilepath", CONFIGDIR + "mars.txt" );
+	m_ColorRefreshTime = CFG->GetInt("bot_colourrefresh", 5);
 
 	ReadProviders();
 	size_t f;

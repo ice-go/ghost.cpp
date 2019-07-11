@@ -99,6 +99,20 @@ bool CGHostDB :: AdminAdd( string server, string user )
 	return false;
 }
 
+bool CGHostDB :: PlayerColorAdd( string server, string user, string color, uint32_t expiredate )
+{
+	return false;
+}
+
+bool CGHostDB :: PlayerColorRemove( string server, string user )
+{
+	return false;
+}
+
+{
+	return false;
+}
+
 bool CGHostDB :: AdminRemove( string server, string user )
 {
 	return false;
@@ -112,6 +126,11 @@ vector<string> CGHostDB :: AdminList( string server )
 vector<string> CGHostDB :: RemoveTempBanList( string server )
 {
 	return vector<string>( );
+}
+
+uint32_t CGHostDB :: RemoveTempPlayerColorList( string server )
+{
+	return 0;
 }
 
 vector<string> CGHostDB :: RemoveBanListDay( string server, uint32_t day )
@@ -356,6 +375,26 @@ CCallableSafeList *CGHostDB :: ThreadedSafeList( string server )
 	return NULL;
 }
 
+CCallablePlayerColorList *CGHostDB :: ThreadedPlayerColorList( string server )
+{
+	return NULL;
+}
+
+CCallablePlayerColorAdd *CGHostDB :: ThreadedPlayerColorAdd( string server, string user, string color, uint32_t expiredate )
+{
+	return NULL;
+}
+
+CCallablePlayerColorRemove *CGHostDB :: ThreadedPlayerColorRemove( string server, string user )
+{
+	return NULL;
+}
+
+CCallablePlayerColorAdd *CGHostDB :: ThreadedPlayerColorUpdate( string server, string user, string color, uint32_t expiredate )
+{
+	return NULL;
+}
+
 CCallableSafeList *CGHostDB :: ThreadedSafeListV( string server )
 {
 	return NULL;
@@ -577,6 +616,21 @@ CCallableAccessesList :: ~CCallableAccessesList( )
 }
 
 CCallableSafeList :: ~CCallableSafeList( )
+{
+
+}
+
+CCallablePlayerColorList :: ~CCallablePlayerColorList( )
+{
+
+}
+
+CCallablePlayerColorAdd :: ~CCallablePlayerColorAdd( )
+{
+
+}
+
+CCallablePlayerColorRemove :: ~CCallablePlayerColorRemove( )
 {
 
 }

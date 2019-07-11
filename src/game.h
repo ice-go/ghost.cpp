@@ -55,6 +55,8 @@ protected:
 	vector<PairedCalculateScores> m_PairedCalculateScores;			// vector of paired threaded database calculate scores in progress
 	vector<PairedSafeAdd> m_PairedSafeAdds;		// vector of paired threaded database safe adds in progress
 	vector<PairedSafeRemove> m_PairedSafeRemoves;// vector of paired threaded database safe removes in progress
+	vector<PairedPlayerColorAdd> m_PairedPlayerColorAdds;
+	vector<PairedPlayerColorRemove> m_PairedPlayerColorRemoves;
 	vector<PairedGPSCheck> m_PairedGPSChecks;	// vector of paired threaded database game player summary checks in progress
 	vector<PairedDPSCheck> m_PairedDPSChecks;	// vector of paired threaded database DotA player summary checks in progress
 	uint32_t m_GameOverTime;					// GetTime when the game was over as reported by the stats class

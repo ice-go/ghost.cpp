@@ -46,6 +46,9 @@ class CCallableCalculateScores;
 class CCallableWarnUpdate;
 class CCallableWarnForget;
 class CCallableSafeList;
+class CCallablePlayerColorList;
+class CCallablePlayerColorAdd;
+class CCallablePlayerColorRemove;
 class CCallableTodayGamesCount;
 class CCallableBanCount;
 class CCallableBanCheck;
@@ -111,9 +114,12 @@ public:
 	virtual bool SafeAdd( string server, string user, string voucher );
 	virtual bool SafeRemove( string server, string user );
 	virtual bool AdminAdd( string server, string user );
+	virtual bool PlayerColorAdd( string server, string user, string color, uint32_t expiredate );
+	virtual bool PlayerColorRemove( string server, string user );
 	virtual bool AdminRemove( string server, string user );
 	virtual vector<string> AdminList( string server );
 	virtual vector<string> RemoveTempBanList( string server );
+	virtual uint32_t RemoveTempPlayerColorList( string server );
 	virtual vector<string> RemoveBanListDay( string server, uint32_t day );
 	virtual CDBScoreSummary *ScoreCheck( string name);
 	virtual uint32_t ScoresCount( string server );
@@ -165,6 +171,10 @@ public:
 	virtual CCallableSafeCheck *ThreadedSafeCheck( string server, string user );
 	virtual CCallableSafeAdd *ThreadedSafeAdd( string server, string user, string voucher );
 	virtual CCallableSafeRemove *ThreadedSafeRemove( string server, string user );
+	virtual CCallablePlayerColorList *ThreadedPlayerColorList( string server );
+	virtual CCallablePlayerColorAdd *ThreadedPlayerColorAdd( string server, string user, string color, uint32_t expiredate );
+	virtual CCallablePlayerColorRemove *ThreadedPlayerColorRemove( string server, string user );
+	virtual CCallablePlayerColorAdd *ThreadedPlayerColorUpdate( string server, string user, string color, uint32_t expiredate );
 	virtual CCallableNoteAdd *ThreadedNoteAdd( string server, string user, string note );
 	virtual CCallableNoteAdd *ThreadedNoteUpdate( string server, string user, string note );
 	virtual CCallableNoteRemove *ThreadedNoteRemove( string server, string user );
@@ -355,6 +365,57 @@ public:
 	virtual void SetResult( vector<string> nResult )		{ m_Result = nResult; }
 };
 
+class CCallablePlayerColorList : virtual public CBaseCallable
+{
+protected:
+	string m_Server;
+	vector<pair< string, string > > m_Result;
+public:
+	CCallablePlayerColorList( string nServer ) : CBaseCallable( ), m_Server( nServer ) { }
+	virtual ~CCallablePlayerColorList( );
+
+	virtual string GetServer( )				{ return m_Server; }
+	virtual vector<pair< string, string > > GetResult( )				{ return m_Result; }
+	virtual void SetResult( vector<pair< string, string > > nResult )	{ m_Result = nResult; }
+};
+
+class CCallablePlayerColorAdd : virtual public CBaseCallable
+{
+protected:
+	string m_Server;
+	string m_User;
+	string m_Color;
+	uint32_t m_Expiredate;
+	bool m_Result;
+
+public:
+	CCallablePlayerColorAdd( string nServer, string nUser, string nColor, uint32_t nExpiredate ) : CBaseCallable( ), m_Server( nServer ), m_User( nUser ), m_Color( nColor ), m_Expiredate( nExpiredate ),m_Result( false ) { }
+	virtual ~CCallablePlayerColorAdd( );
+
+	virtual string GetServer( )				{ return m_Server; }
+	virtual string GetUser( )				{ return m_User; }
+	virtual string GetColor( )			{ return m_Color; }
+	virtual uint32_t GetExpiredate( )     { return m_Expiredate; }
+	virtual bool GetResult( )				{ return m_Result; }
+	virtual void SetResult( bool nResult )	{ m_Result = nResult; }
+};
+
+class CCallablePlayerColorRemove : virtual public CBaseCallable
+{
+protected:
+	string m_Server;
+	string m_User;
+	bool m_Result;
+
+public:
+	CCallablePlayerColorRemove( string nServer, string nUser ) : CBaseCallable( ), m_Server( nServer ), m_User( nUser ), m_Result( false ) { }
+	virtual ~CCallablePlayerColorRemove( );
+
+	virtual string GetServer( )				{ return m_Server; }
+	virtual string GetUser( )				{ return m_User; }
+	virtual bool GetResult( )				{ return m_Result; }
+	virtual void SetResult( bool nResult )	{ m_Result = nResult; }
+};
 
 class CCallableRanks : virtual public CBaseCallable
 {

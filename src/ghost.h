@@ -361,6 +361,7 @@ public:
 	string m_WelcomeFilePath;
 	string m_ChannelWelcomeFilePath;
 	string m_MarsFilePath;
+	uint32_t m_ColorRefreshTime;
 
 	CGHost( CConfig *CFG );
 	~CGHost( );

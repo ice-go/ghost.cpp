@@ -42,6 +42,9 @@ class CCallableRanks;
 class CCallableSafeAdd;
 class CCallableSafeRemove;
 class CCallableSafeList;
+class CCallablePlayerColorAdd;
+class CCallablePlayerColorRemove;
+class CCallablePlayerColorList;
 class CCallableCalculateScores;
 class CCallableTodayGamesCount;
 class CCallableBanCount;
@@ -65,6 +68,8 @@ typedef pair<string,CCallableCalculateScores *> PairedCalculateScores;
 typedef pair<string,CCallableRanks *> PairedRanks;
 typedef pair<string,CCallableSafeAdd *> PairedSafeAdd;
 typedef pair<string,CCallableSafeRemove *> PairedSafeRemove;
+typedef pair<string,CCallablePlayerColorAdd *> PairedPlayerColorAdd;
+typedef pair<string,CCallablePlayerColorRemove *> PairedPlayerColorRemove;
 typedef pair<string,CCallableRunQuery *> PairedRunQuery;
 
 class CBNET
@@ -97,6 +102,9 @@ private:
 	vector<PairedRanks> m_PairedRanks;				// vector of paired threaded database ranks in progress
 	vector<PairedSafeAdd> m_PairedSafeAdds;			// vector of paired threaded database safe adds in progress
 	vector<PairedSafeRemove> m_PairedSafeRemoves;	// vector of paired threaded database safe removes in progress
+	vector<PairedPlayerColorAdd> m_PairedPlayerColorAdds;
+	vector<PairedPlayerColorRemove> m_PairedPlayerColorRemoves;
+	CCallablePlayerColorList *m_CallablePlayerColorList;	
 	vector<PairedRunQuery> m_PairedRunQueries;
 	string m_DownloadFileUser;
 	CCallableTodayGamesCount *m_CallableTodayGamesCount;
@@ -148,6 +156,7 @@ private:
 	uint32_t m_LastOutPacketTicks;					// GetTicks when the last packet was sent for the m_OutPackets queue
 	uint32_t m_LastOutPacketSize;
 	uint32_t m_LastAdminRefreshTime;				// GetTime when the admin list was last refreshed from the database
+	uint32_t m_LastPlayerColorRefreshTime;
 	uint32_t m_LastBanRefreshTime;					// GetTime when the ban list was last refreshed from the database
 	bool m_FirstConnect;
 	uint32_t m_LastMars;
@@ -155,6 +164,8 @@ private:
 	bool m_RemoveTempBans;
 	uint32_t m_LastTempBanRemoveTime;
 	uint32_t m_LastBanRemoveTime;
+	bool m_RemoveTempPlayerColor;
+	uint32_t m_LastTmpPlayerColorDelTime;
 	bool m_WaitingToConnect;						// if we're waiting to reconnect to battle.net after being disconnected
 	bool m_LoggedIn;								// if we've logged into battle.net or not
 	bool m_InChat;									// if we've entered chat or not (but we're not necessarily in a chat channel yet)
@@ -179,6 +190,7 @@ public:
 	vector<string> m_Notes;							// vector of cached notes names
 	vector<string> m_NotesN;						// vector of cached notes
 	vector<string> m_Safe;							// vector of cached safelist
+	vector<pair< string, string> > m_PlayerColor;
 	vector<string> m_SafeVouchers;					// vector of cached safelist vouchers
 	vector<string> m_Admins;						// vector of cached admins
 	vector<string> m_RemoveTempBansList;			// vector of temp bans to remove today
@@ -247,6 +259,9 @@ public:
 	bool GetWhereis( ) { return m_Whereis; }
 	bool IsAdmin( string name );
 	bool IsSafe( string name );
+	string IsColored( string name);
+	void AddColor( string name, string color );
+	void RemoveColor( string name );
 	string Voucher( string name );
 	bool IsNoted( string name );
 	string Note( string name );

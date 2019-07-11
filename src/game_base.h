@@ -453,6 +453,7 @@ public:
 	virtual bool IsAutoBanned( string name );
 	virtual bool IsAdmin( string name );
 	virtual bool IsSafe( string name );
+	virtual string IsColored( string name );
 	virtual string Voucher( string name );
 	virtual void AddNote( string name, string note );
 	virtual bool IsNoted( string name );
