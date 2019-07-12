@@ -3839,6 +3839,7 @@ void CGHost :: ReloadConfig ()
 	m_ShowDownloadsInfoTime = CFG->GetInt( "bot_showdownloadsinfotime", 3 );
 	m_ShowDownloadsInfo = CFG->GetInt( "bot_showdownloadsinfo", 1 ) == 0 ? false : true;
 	m_ShowScoresOnJoin = CFG->GetInt( "bot_showscoresonjoin", 0 ) == 0 ? false : true;
+	m_ShowUserStatsOnJoin = CFG->GetInt( "bot_showuserstatsonjoin", 0 ) == 0 ? false : true;
 	m_ShowNotesOnJoin = CFG->GetInt( "bot_shownotesonjoin", 0 ) == 0 ? false : true;
 	m_ShuffleSlotsOnStart = CFG->GetInt( "bot_shuffleslotsonstart", 0 ) == 0 ? false : true;
 	m_ShowCountryNotAllowed = CFG->GetInt( "bot_showcountrynotallowed", 1 ) == 0 ? false : true;

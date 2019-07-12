@@ -2446,17 +2446,8 @@ CDBGamePlayerSummary *CGHostDBSQLite :: GamePlayerSummaryCheck( string name )
 		{
 			if( sqlite3_column_count( (sqlite3_stmt *)Statement ) == 12 )
 			{
-				char *First = (char *)sqlite3_column_text( (sqlite3_stmt *)Statement, 0 );
-				char *Last = (char *)sqlite3_column_text( (sqlite3_stmt *)Statement, 1 );
-				string FirstGameDateTime;
-				string LastGameDateTime;
-
-				if( First )
-					FirstGameDateTime = First;
-
-				if( Last )
-					LastGameDateTime = Last;
-
+				uint32_t FirstGameDateTime = sqlite3_column_int( (sqlite3_stmt *)Statement, 0 );
+				uint32_t LastGameDateTime = sqlite3_column_int( (sqlite3_stmt *)Statement, 1 );
 				uint32_t TotalGames = sqlite3_column_int( (sqlite3_stmt *)Statement, 2 );
 				uint32_t MinLoadingTime = sqlite3_column_int( (sqlite3_stmt *)Statement, 3 );
 				uint32_t AvgLoadingTime = sqlite3_column_int( (sqlite3_stmt *)Statement, 4 );
@@ -2467,7 +2458,7 @@ CDBGamePlayerSummary *CGHostDBSQLite :: GamePlayerSummaryCheck( string name )
 				uint32_t MinDuration = sqlite3_column_int( (sqlite3_stmt *)Statement, 9 );
 				uint32_t AvgDuration = sqlite3_column_int( (sqlite3_stmt *)Statement, 10 );
 				uint32_t MaxDuration = sqlite3_column_int( (sqlite3_stmt *)Statement, 11 );
-				GamePlayerSummary = new CDBGamePlayerSummary( string( ), name, FirstGameDateTime, LastGameDateTime, TotalGames, MinLoadingTime, AvgLoadingTime, MaxLoadingTime, MinLeftPercent, AvgLeftPercent, MaxLeftPercent, MinDuration, AvgDuration, MaxDuration );
+				GamePlayerSummary = new CDBGamePlayerSummary( string( ), name, FirstGameDateTime, LastGameDateTime, TotalGames, MinLoadingTime, AvgLoadingTime, MaxLoadingTime, MinLeftPercent, AvgLeftPercent, MaxLeftPercent, MinDuration, AvgDuration, MaxDuration, 0);
 			}
 			else
 				CONSOLE_Print( "[SQLITE3] error checking gameplayersummary [" + name + "] - row doesn't have 12 columns" );

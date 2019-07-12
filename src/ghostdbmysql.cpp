@@ -1612,8 +1612,7 @@ CDBGamePlayerSummary *MySQLGamePlayerSummaryCheck( void *conn, string *error, ui
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 	string EscName = MySQLEscapeString( conn, name );
 	CDBGamePlayerSummary *GamePlayerSummary = NULL;
-	string Query = "SELECT MIN(DATE(datetime)), MAX(DATE(datetime)), COUNT(*), MIN(loadingtime), AVG(loadingtime), MAX(loadingtime), MIN(`left`/duration)*100, AVG(`left`/duration)*100, MAX(`left`/duration)*100, MIN(duration), AVG(duration), MAX(duration) FROM gameplayers LEFT JOIN games ON games.id=gameid WHERE name='" + EscName + "'";
-
+	string Query = "SELECT MIN(date), MAX(date), COUNT(*), MIN(loadingtime), AVG(loadingtime), MAX(loadingtime), MIN(`left`/duration)*100, AVG(`left`/duration)*100, MAX(`left`/duration)*100, MIN(duration), AVG(duration), MAX(duration), SUM(`left`) FROM gameplayers LEFT JOIN games ON games.id=gameid WHERE name='" + EscName + "'";
 	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
 		*error = mysql_error( (MYSQL *)conn );
 	else
@@ -1624,10 +1623,10 @@ CDBGamePlayerSummary *MySQLGamePlayerSummaryCheck( void *conn, string *error, ui
 		{
 			vector<string> Row = MySQLFetchRow( Result );
 
-			if( Row.size( ) == 12 )
+			if( Row.size( ) == 13 )
 			{
-				string FirstGameDateTime = Row[0];
-				string LastGameDateTime = Row[1];
+				uint32_t FirstGameDateTime = UTIL_ToUInt32( Row[0] );
+				uint32_t LastGameDateTime = UTIL_ToUInt32( Row[1] );
 				uint32_t TotalGames = UTIL_ToUInt32( Row[2] );
 				uint32_t MinLoadingTime = UTIL_ToUInt32( Row[3] );
 				uint32_t AvgLoadingTime = UTIL_ToUInt32( Row[4] );
@@ -1638,7 +1637,8 @@ CDBGamePlayerSummary *MySQLGamePlayerSummaryCheck( void *conn, string *error, ui
 				uint32_t MinDuration = UTIL_ToUInt32( Row[9] );
 				uint32_t AvgDuration = UTIL_ToUInt32( Row[10] );
 				uint32_t MaxDuration = UTIL_ToUInt32( Row[11] );
-				GamePlayerSummary = new CDBGamePlayerSummary( string( ), name, FirstGameDateTime, LastGameDateTime, TotalGames, MinLoadingTime, AvgLoadingTime, MaxLoadingTime, MinLeftPercent, AvgLeftPercent, MaxLeftPercent, MinDuration, AvgDuration, MaxDuration );
+				uint32_t TotalTimePlayed = UTIL_ToUInt32( Row[12] );
+				GamePlayerSummary = new CDBGamePlayerSummary( string( ), name, FirstGameDateTime, LastGameDateTime, TotalGames, MinLoadingTime, AvgLoadingTime, MaxLoadingTime, MinLeftPercent, AvgLeftPercent, MaxLeftPercent, MinDuration, AvgDuration, MaxDuration, TotalTimePlayed );
 			}
 			else
 				*error = "error checking gameplayersummary [" + name + "] - row doesn't have 12 columns";

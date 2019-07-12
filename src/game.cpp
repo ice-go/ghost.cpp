@@ -303,6 +303,13 @@ bool CGame :: Update( void *fd, void *send_fd )
 		m_ShowScoreOf=string();
 	}
 
+	if (m_ShowUserStatsOf != "")
+	{
+		if (!m_GHost->m_CalculatingScores)
+		m_PairedGPSChecks.push_back( PairedGPSCheck( "", m_GHost->m_DB->ThreadedGamePlayerSummaryCheck( m_ShowUserStatsOf ) ) );
+		m_ShowUserStatsOf=string();
+	}
+
 	// removing creator from friend list
 
 	if (m_GHost->m_addcreatorasfriendonhost && m_CreatorAsFriend )
@@ -556,13 +563,15 @@ bool CGame :: Update( void *fd, void *send_fd )
 			if( GamePlayerSummary )
 			{
 				if( i->first.empty( ) )
-					SendAllChat( m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), GamePlayerSummary->GetFirstGameDateTime( ), GamePlayerSummary->GetLastGameDateTime( ), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ) ) );
+					SendAllChat( m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), UTIL_ToString(GamePlayerSummary->GetFirstGameDateTime( )), UTIL_ToString(GamePlayerSummary->GetLastGameDateTime( )), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ), UTIL_ToString(GamePlayerSummary->GetTotalTimePlayed( ) / 3600), UTIL_ToString((GamePlayerSummary->GetTotalTimePlayed( ) % 3600)/60),
+					UTIL_ToString((GamePlayerSummary->GetLastGameDateTime( ) - GamePlayerSummary->GetFirstGameDateTime( ))/(60*60*24) ) ) );
 				else
 				{
 					CGamePlayer *Player = GetPlayerFromName( i->first, true );
 
 					if( Player )
-						SendChat( Player, m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), GamePlayerSummary->GetFirstGameDateTime( ), GamePlayerSummary->GetLastGameDateTime( ), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ) ) );
+						SendChat( Player, m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), UTIL_ToString(GamePlayerSummary->GetFirstGameDateTime( )), UTIL_ToString(GamePlayerSummary->GetLastGameDateTime( )), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ), UTIL_ToString(GamePlayerSummary->GetTotalTimePlayed( ) / 3600), UTIL_ToString((GamePlayerSummary->GetTotalTimePlayed( ) % 3600)/60),
+						UTIL_ToString((GamePlayerSummary->GetLastGameDateTime( ) - GamePlayerSummary->GetFirstGameDateTime( ))/(60*60*24) ) ) );
 				}
 			}
 			else

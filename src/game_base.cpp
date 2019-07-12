@@ -168,6 +168,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_RefreshError = false;
 	m_OwnerJoined = false;
 	m_ShowScoreOf = string();
+	m_ShowUserStatsOf = string();
 	m_ShowNoteOf = string();
 	m_DisableStats = false;
 	m_HCL = false;
@@ -3570,6 +3571,9 @@ void CBaseGame :: EventPlayerJoined( CPotentialPlayer *potential, CIncomingJoinP
 
 	if (m_GHost->m_ShowScoresOnJoin)
 		m_ShowScoreOf = Player->GetName();
+	
+	if( m_GHost->m_ShowUserStatsOnJoin)
+		m_ShowUserStatsOf = Player->GetName();
 
 	// show current player's .note
 	if (m_GHost->m_ShowNotesOnJoin)

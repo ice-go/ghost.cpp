@@ -98,7 +98,7 @@ public:
 	string SettingLatencyToMaximum( string max );
 	string SettingLatencyTo( string latency );
 	string KickingPlayersWithPingsGreaterThan( string total, string ping );
-	string HasPlayedGamesWithThisBot( string user, string firstgame, string lastgame, string totalgames, string avgloadingtime, string avgstay );
+	string HasPlayedGamesWithThisBot( string user, string firstgame, string lastgame, string totalgames, string avgloadingtime, string avgstay, string totalhoursplayed, string totalminutesrestplayed, string expirience);
 	string HasntPlayedGamesWithThisBot( string user );
 	string AutokickingPlayerForDeniedCountry( string victim, string country );
 	string AutokickingPlayerForDeniedProvider( string victim, string provider );

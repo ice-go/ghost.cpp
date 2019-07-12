@@ -135,6 +135,7 @@ public:
 	bool m_ShuffleSlotsOnStart;
 	bool m_ShowCountryNotAllowed;
 	bool m_ShowScoresOnJoin;
+	bool m_ShowUserStatsOnJoin;
 	bool m_ShowNotesOnJoin;
 	uint32_t m_AutoRehostDelay;
 	bool m_RehostIfNameTaken;

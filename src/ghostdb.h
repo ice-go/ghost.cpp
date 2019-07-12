@@ -1118,8 +1118,8 @@ class CDBGamePlayerSummary
 private:
 	string m_Server;
 	string m_Name;
-	string m_FirstGameDateTime;		// datetime of first game played
-	string m_LastGameDateTime;		// datetime of last game played
+	uint32_t m_FirstGameDateTime;		// datetime of first game played
+	uint32_t m_LastGameDateTime;		// datetime of last game played
 	uint32_t m_TotalGames;			// total number of games played
 	uint32_t m_MinLoadingTime;		// minimum loading time in milliseconds (this could be skewed because different maps have different load times)
 	uint32_t m_AvgLoadingTime;		// average loading time in milliseconds (this could be skewed because different maps have different load times)
@@ -1130,15 +1130,16 @@ private:
 	uint32_t m_MinDuration;			// minimum game duration in seconds
 	uint32_t m_AvgDuration;			// average game duration in seconds
 	uint32_t m_MaxDuration;			// maximum game duration in seconds
+	uint32_t m_TotalTimePlayed;     // total time spent on games
 
 public:
-	CDBGamePlayerSummary( string nServer, string nName, string nFirstGameDateTime, string nLastGameDateTime, uint32_t nTotalGames, uint32_t nMinLoadingTime, uint32_t nAvgLoadingTime, uint32_t nMaxLoadingTime, uint32_t nMinLeftPercent, uint32_t nAvgLeftPercent, uint32_t nMaxLeftPercent, uint32_t nMinDuration, uint32_t nAvgDuration, uint32_t nMaxDuration );
+	CDBGamePlayerSummary( string nServer, string nName, uint32_t nFirstGameDateTime, uint32_t nLastGameDateTime, uint32_t nTotalGames, uint32_t nMinLoadingTime, uint32_t nAvgLoadingTime, uint32_t nMaxLoadingTime, uint32_t nMinLeftPercent, uint32_t nAvgLeftPercent, uint32_t nMaxLeftPercent, uint32_t nMinDuration, uint32_t nAvgDuration, uint32_t nMaxDuration, uint32_t nTotalTimePlayed );
 	~CDBGamePlayerSummary( );
 
 	string GetServer( )					{ return m_Server; }
 	string GetName( )					{ return m_Name; }
-	string GetFirstGameDateTime( )		{ return m_FirstGameDateTime; }
-	string GetLastGameDateTime( )		{ return m_LastGameDateTime; }
+	uint32_t GetFirstGameDateTime( )		{ return m_FirstGameDateTime; }
+	uint32_t GetLastGameDateTime( )		{ return m_LastGameDateTime; }
 	uint32_t GetTotalGames( )			{ return m_TotalGames; }
 	uint32_t GetMinLoadingTime( )		{ return m_MinLoadingTime; }
 	uint32_t GetAvgLoadingTime( )		{ return m_AvgLoadingTime; }
@@ -1149,6 +1150,7 @@ public:
 	uint32_t GetMinDuration( )			{ return m_MinDuration; }
 	uint32_t GetAvgDuration( )			{ return m_AvgDuration; }
 	uint32_t GetMaxDuration( )			{ return m_MaxDuration; }
+	uint32_t GetTotalTimePlayed( )	    { return m_TotalTimePlayed; }
 };
 
 //

@@ -109,10 +109,6 @@ bool CGHostDB :: PlayerColorRemove( string server, string user )
 	return false;
 }
 
-{
-	return false;
-}
-
 bool CGHostDB :: AdminRemove( string server, string user )
 {
 	return false;
@@ -851,7 +847,7 @@ CDBGamePlayer :: ~CDBGamePlayer( )
 // CDBGamePlayerSummary
 //
 
-CDBGamePlayerSummary :: CDBGamePlayerSummary( string nServer, string nName, string nFirstGameDateTime, string nLastGameDateTime, uint32_t nTotalGames, uint32_t nMinLoadingTime, uint32_t nAvgLoadingTime, uint32_t nMaxLoadingTime, uint32_t nMinLeftPercent, uint32_t nAvgLeftPercent, uint32_t nMaxLeftPercent, uint32_t nMinDuration, uint32_t nAvgDuration, uint32_t nMaxDuration )
+CDBGamePlayerSummary :: CDBGamePlayerSummary( string nServer, string nName, uint32_t nFirstGameDateTime, uint32_t nLastGameDateTime, uint32_t nTotalGames, uint32_t nMinLoadingTime, uint32_t nAvgLoadingTime, uint32_t nMaxLoadingTime, uint32_t nMinLeftPercent, uint32_t nAvgLeftPercent, uint32_t nMaxLeftPercent, uint32_t nMinDuration, uint32_t nAvgDuration, uint32_t nMaxDuration, uint32_t nTotalTimePlayed )
 {
 	m_Server = nServer;
 	m_Name = nName;
@@ -867,6 +863,7 @@ CDBGamePlayerSummary :: CDBGamePlayerSummary( string nServer, string nName, stri
 	m_MinDuration = nMinDuration;
 	m_AvgDuration = nAvgDuration;
 	m_MaxDuration = nMaxDuration;
+	m_TotalTimePlayed = nTotalTimePlayed;
 }
 
 CDBGamePlayerSummary :: ~CDBGamePlayerSummary( )
