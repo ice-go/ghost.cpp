@@ -68,6 +68,8 @@ CGHostDBMySQL :: CGHostDBMySQL( CConfig *CFG ) : CGHostDB( CFG )
 
 	my_bool Reconnect = true;
 	mysql_options( Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+	mysql_options( Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+	mysql_options( Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8"); 
 
 	if( !( mysql_real_connect( Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 	{
@@ -2154,6 +2156,8 @@ void CMySQLCallable :: Init( )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)m_Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)m_Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)m_Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)m_Connection, m_SQLServer.c_str( ), m_SQLUser.c_str( ), m_SQLPassword.c_str( ), m_SQLDatabase.c_str( ), m_SQLPort, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)m_Connection );
@@ -2869,6 +2873,8 @@ uint32_t CGHostDBMySQL :: RemoveTempPlayerColorList( string server )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3391,6 +3397,8 @@ bool CGHostDBMySQL :: AdminSetAccess( string server, string user, uint32_t acces
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3430,6 +3438,8 @@ uint32_t CGHostDBMySQL :: TodayGamesCount( )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3468,6 +3478,8 @@ uint32_t CGHostDBMySQL :: BanCount( string server )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3506,6 +3518,8 @@ uint32_t CGHostDBMySQL :: BanCount( string name, uint32_t warn )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3544,6 +3558,8 @@ uint32_t CGHostDBMySQL :: BanCount( string server, string name, uint32_t warn )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3582,6 +3598,8 @@ bool CGHostDBMySQL :: WarnForget( string name, uint32_t gamethreshold )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3620,6 +3638,8 @@ bool CGHostDBMySQL :: WarnUpdate( string user, uint32_t before, uint32_t after )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3658,6 +3678,8 @@ bool CGHostDBMySQL :: BanUpdate( string user, string ip )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3696,6 +3718,8 @@ string CGHostDBMySQL :: RunQuery( string query )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+ 		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+  		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3734,6 +3758,8 @@ CDBBan * CGHostDBMySQL :: BanCheck( string server, string user, string ip, uint3
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3774,6 +3800,8 @@ bool CGHostDBMySQL :: BanAdd( string server, string user, string ip, string game
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3814,6 +3842,8 @@ bool CGHostDBMySQL :: BanRemove( string server, string user, string admin, uint3
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3862,6 +3892,8 @@ bool CGHostDBMySQL :: BanRemove( string user, uint32_t warn )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3903,6 +3935,8 @@ string CGHostDBMySQL :: WarnReasonsCheck( string user, uint32_t warn )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3944,6 +3978,8 @@ uint32_t CGHostDBMySQL :: RemoveTempBans( string server)
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -3985,6 +4021,8 @@ vector<string> CGHostDBMySQL :: RemoveTempBanList( string server )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -4026,6 +4064,8 @@ vector<string> CGHostDBMySQL :: RemoveBanListDay( string server, uint32_t day )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
@@ -4067,6 +4107,8 @@ uint32_t CGHostDBMySQL :: ScoresCount( string server )
 
 		my_bool Reconnect = true;
 		mysql_options( (MYSQL *)Connection, MYSQL_OPT_RECONNECT, &Reconnect );
+		mysql_options( (MYSQL *)Connection, MYSQL_SET_CHARSET_NAME, "utf8");
+ 		mysql_options( (MYSQL *)Connection, MYSQL_INIT_COMMAND, "SET NAMES utf8");
 
 		if( !( mysql_real_connect( (MYSQL *)Connection, m_Server.c_str( ), m_User.c_str( ), m_Password.c_str( ), m_Database.c_str( ), m_Port, NULL, 0 ) ) )
 			m_Error = mysql_error( (MYSQL *)Connection );
