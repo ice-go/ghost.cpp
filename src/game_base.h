@@ -44,6 +44,7 @@ class CCallableBanUpdate;
 class CCallableRunQuery;
 class CCallableScoreCheck;
 class CCallableWarnCount;
+typedef pair<string,string> NameMessage;
 
 class CBaseGame
 {
@@ -51,6 +52,7 @@ public:
 	CGHost *m_GHost;
 
 protected:
+	vector<NameMessage> m_Messages;
 	CTCPServer *m_Socket;							// listening socket
 	CGameProtocol *m_Protocol;						// game protocol
 //	vector<CGameSlot> m_Slots;						// vector of slots
@@ -252,6 +254,10 @@ public:
 	uint32_t m_GetMapNumTeams;
 	unsigned char m_GetMapGameType;
 	uint32_t m_GetMapOnlyAutoWarnIfMoreThanXPlayers;
+	uint32_t m_LastGameInfoTime;
+	vector<string> m_ChatLobbyLog;
+	vector<string> m_ChatGameLog;
+	
 	CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16_t nHostPort, unsigned char nGameState, string nGameName, string nOwnerName, string nCreatorName, string nCreatorServer );
 	virtual ~CBaseGame( );
 

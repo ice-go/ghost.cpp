@@ -100,6 +100,8 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 		if( m_GProxyEmptyActions > 9 )
 			m_GProxyEmptyActions = 9;
 	}
+	m_ChatLobbyLog.clear();
+	m_ChatGameLog.clear();
 	m_GameName = nGameName;
 	wtvprocessid = 0;
 	AddGameName(m_GameName);
@@ -4819,12 +4821,15 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 //						m_GameOverDiffCanceled = true;
 					}
 
+					string team_color = UTIL_ToString(fteam+1);
+					string color = "darkred";
+
 					if( ExtraFlags[0] == 0 )
 					{
+						if ( team_color == "2" ) color = "darkgreen";
 						// this is an ingame [All] message, print it to the console
-
-
 						CONSOLE_Print( "[GAME: " + m_GameName + "] (" + MinString + ":" + SecString + ") "+"[Team: "+UTIL_ToString(fteam+1)+"] [All] [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
+						 m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") [All] <span style='color: "+color+"'><b>" + player->GetName( ) + "</b></span>: " + chatPlayer->GetMessage( ) );
 
 						// don't relay ingame messages targeted for all players if we're currently muting all
 						// note that commands will still be processed even when muting all because we only stop relaying the messages, the rest of the function is unaffected
@@ -4833,6 +4838,13 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 						if(!isRootAdmin)
 							Relay = false;
 					}	
+					else if( ExtraFlags[0] == 1 )
+					{
+						if ( team_color == "2" ) color = "darkgreen";
+						m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") [Allies] <span style='color: "+color+"'><b>" + player->GetName( ) + "</b></span>: " + chatPlayer->GetMessage( ) );
+					}
+					else if( ExtraFlags[0] == 2 )
+						m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") <span style='color: black;'><b>[Obs/Ref]</b></span>: [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
 
 					if (m_Listen)
 					{
@@ -4893,7 +4905,14 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 
 					}
 
-					CONSOLE_Print( "[GAME: " + m_GameName + "] [Lobby] [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
+					time_t currentUnixTime = time( NULL );
+					string currentFormattedTime = asctime( localtime( &currentUnixTime ) );
+
+					//erase the newline
+					currentFormattedTime.erase( currentFormattedTime.size( ) - 1 );
+
+					CONSOLE_Print( "[GAME: " + m_GameName + "] [Lobby] [" + player->GetName( ) + "][Time] [" + currentFormattedTime + "] :" + chatPlayer->GetMessage( ) );
+					m_ChatLobbyLog.push_back( UTIL_ToString(GetTime()) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ));
 					m_GHost->UDPChatSend("|lobby "+player->GetName()+" "+chatPlayer->GetMessage());
 					if( m_MuteLobby )
 						Relay = false;
