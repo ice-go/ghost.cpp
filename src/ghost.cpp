@@ -869,6 +869,7 @@ CGHost :: CGHost( CConfig *CFG )
 	else
 		m_DB = new CGHostDBSQLite( CFG );
 
+	m_BotID = CFG->GetInt( "db_mysql_botid", 0 );
 	CONSOLE_Print( "[GHOST] opening secondary (local) database" );
 	m_DBLocal = new CGHostDBSQLite( CFG );
 
