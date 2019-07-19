@@ -143,6 +143,10 @@ private:
 	bool m_RankSet;
 	string m_ScoreS;
 	string m_RankS;
+	uint32_t m_TotalGames;
+	uint32_t m_TotalTimePlayed;
+	uint32_t m_AvarageStayPercent;
+	uint32_t m_Expirience;
 
 public:
 	CGamePlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSocket *nSocket, unsigned char nPID, string nJoinedRealm, string nName, BYTEARRAY nInternalIP, bool nReserved );
@@ -207,6 +211,10 @@ public:
 	bool GetGProxy( )							{ return m_GProxy; }
 	bool GetGProxyDisconnectNoticeSent( )		{ return m_GProxyDisconnectNoticeSent; }
 	uint32_t GetGProxyReconnectKey( )			{ return m_GProxyReconnectKey; }
+	uint32_t GetTotalGames()					{ return m_TotalGames; }
+	uint32_t GetTotalTimePlayed()				{ return m_TotalTimePlayed; }
+	uint32_t GetAvarageStayPercent()			{ return m_AvarageStayPercent; }
+	uint32_t GetExpirience()					{ return m_Expirience; }
 
 	void SetLeftReason( string nLeftReason )										{ m_LeftReason = nLeftReason; }
 	void SetSpoofedRealm( string nSpoofedRealm )									{ m_SpoofedRealm = nSpoofedRealm; }
@@ -251,6 +259,10 @@ public:
 	void SetRankS( string nRank )											{ m_RankS = nRank; m_RankSet = true; }
 	void SetProvider( string nProvider )									{ m_Provider = nProvider;}
 	void SetCountry( string nCountry )										{ m_Country = nCountry;}
+	void SetTotalGames( uint32_t nTotalGames )								{ m_TotalGames = nTotalGames; }
+	void SetTotalTimePlayed( uint32_t nTotalTimePlayed )					{ m_TotalTimePlayed = nTotalTimePlayed; }
+	void SetAvarageStayPercent( uint32_t nAvarageStayPercent )				{ m_AvarageStayPercent = nAvarageStayPercent; }
+	void SetExpirience( uint32_t nExpirience )								{ m_Expirience = nExpirience; }
 
 	string GetNameTerminated( );
 	uint32_t GetPing( bool LCPing );

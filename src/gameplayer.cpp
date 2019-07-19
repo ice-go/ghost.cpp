@@ -306,6 +306,10 @@ CGamePlayer :: CGamePlayer( CGameProtocol *nProtocol, CBaseGame *nGame, CTCPSock
 	m_Switching = false;
 	m_Switchok = false;
 	m_WarnChecked = false;
+	m_TotalGames = 0;
+	m_TotalTimePlayed = 0;
+	m_AvarageStayPercent = 0;
+	m_Expirience = 0;
 }
 
 CGamePlayer :: CGamePlayer( CPotentialPlayer *potential, unsigned char nPID, string nJoinedRealm, string nName, BYTEARRAY nInternalIP, bool nReserved ) : CPotentialPlayer( potential->m_Protocol, potential->m_Game, potential->GetSocket( ) )

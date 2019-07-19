@@ -562,16 +562,23 @@ bool CGame :: Update( void *fd, void *send_fd )
 
 			if( GamePlayerSummary )
 			{
+				CGamePlayer *Player = GetPlayerFromName( i->second->GetName( ), true );					
+
+				Player->SetTotalGames(GamePlayerSummary->GetTotalGames( ));
+				Player->SetTotalTimePlayed(GamePlayerSummary->GetTotalTimePlayed( ));
+				Player->SetAvarageStayPercent(GamePlayerSummary->GetAvgLeftPercent( ));
+				Player->SetExpirience((GamePlayerSummary->GetLastGameDateTime( ) - GamePlayerSummary->GetFirstGameDateTime( )) );
+
+				string message = m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), UTIL_ToString(GamePlayerSummary->GetFirstGameDateTime( )), UTIL_ToString(GamePlayerSummary->GetLastGameDateTime( )), UTIL_ToString( Player->GetTotalGames() ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( Player->GetAvarageStayPercent() ), UTIL_ToString(Player->GetTotalTimePlayed( ) / 3600), UTIL_ToString((Player->GetTotalTimePlayed( ) % 3600)/60), UTIL_ToString(Player->GetExpirience()/(60*60*24) ) );
+
 				if( i->first.empty( ) )
-					SendAllChat( m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), UTIL_ToString(GamePlayerSummary->GetFirstGameDateTime( )), UTIL_ToString(GamePlayerSummary->GetLastGameDateTime( )), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ), UTIL_ToString(GamePlayerSummary->GetTotalTimePlayed( ) / 3600), UTIL_ToString((GamePlayerSummary->GetTotalTimePlayed( ) % 3600)/60),
-					UTIL_ToString((GamePlayerSummary->GetLastGameDateTime( ) - GamePlayerSummary->GetFirstGameDateTime( ))/(60*60*24) ) ) );
+					SendAllChat( message );
 				else
 				{
-					CGamePlayer *Player = GetPlayerFromName( i->first, true );
+					CGamePlayer *sendWhisperToPlayer = GetPlayerFromName( i->first, true );
 
-					if( Player )
-						SendChat( Player, m_GHost->m_Language->HasPlayedGamesWithThisBot( i->second->GetName( ), UTIL_ToString(GamePlayerSummary->GetFirstGameDateTime( )), UTIL_ToString(GamePlayerSummary->GetLastGameDateTime( )), UTIL_ToString( GamePlayerSummary->GetTotalGames( ) ), UTIL_ToString( (float)GamePlayerSummary->GetAvgLoadingTime( ) / 1000, 2 ), UTIL_ToString( GamePlayerSummary->GetAvgLeftPercent( ) ), UTIL_ToString(GamePlayerSummary->GetTotalTimePlayed( ) / 3600), UTIL_ToString((GamePlayerSummary->GetTotalTimePlayed( ) % 3600)/60),
-						UTIL_ToString((GamePlayerSummary->GetLastGameDateTime( ) - GamePlayerSummary->GetFirstGameDateTime( ))/(60*60*24) ) ) );
+					if( sendWhisperToPlayer )
+						SendChat( sendWhisperToPlayer, message);
 				}
 			}
 			else
