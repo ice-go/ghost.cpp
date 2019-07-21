@@ -235,6 +235,7 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 	m_DoAutoWarns = false;
 	m_MatchMaking = false;
 	m_LocalAdminMessages = m_GHost->m_LocalAdminMessages;
+	m_LastGameInfoTime = 0;
 
 	if( m_SaveGame )
 	{
@@ -327,6 +328,10 @@ CBaseGame :: CBaseGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16
 
 	if (m_GetMapType == "dota" && m_GHost->m_AutoStartDotaGames)
 		m_AutoStartPlayers = 10;		
+
+	string Query = "INSERT INTO gamestatus ( botid, gamename, description, map, map_slots, map_numteams, creatorname, creatorserver, chat, creationdate ) VALUES ( '"+UTIL_ToString(m_GHost->m_BotID)+"' ,'@LOBBY " + m_GameName + "', '', '" + m_Map->GetMapLocalPath() + "',  '" + UTIL_ToString(GetSlotsOpen()) + "',  '" + UTIL_ToString(m_GetMapNumTeams) + "', '" + GetCreatorName( ) + "', '" + GetCreatorServer( ) + "', '', UNIX_TIMESTAMP() )";
+	m_GHost->m_Callables.push_back(m_GHost->m_DB->ThreadedRunQuery(Query));
+	
 }
 
 CBaseGame :: ~CBaseGame( )
@@ -4821,15 +4826,13 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 //						m_GameOverDiffCanceled = true;
 					}
 
-					string team_color = UTIL_ToString(fteam+1);
-					string color = "darkred";
+					time_t currentUnixTime = time( NULL );
 
 					if( ExtraFlags[0] == 0 )
 					{
-						if ( team_color == "2" ) color = "darkgreen";
 						// this is an ingame [All] message, print it to the console
-						CONSOLE_Print( "[GAME: " + m_GameName + "] (" + MinString + ":" + SecString + ") "+"[Team: "+UTIL_ToString(fteam+1)+"] [All] [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
-						 m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") [All] <span style='color: "+color+"'><b>" + player->GetName( ) + "</b></span>: " + chatPlayer->GetMessage( ) );
+						//CONSOLE_Print( "[GAME: " + m_GameName + "] (" + currentUnixTime + ") "+"[Team: "+UTIL_ToString(fteam+1)+"] [All] [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
+						 m_ChatGameLog.push_back( UTIL_ToString(currentUnixTime) + "||~All~||" + UTIL_ToString(fteam+1) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ) );
 
 						// don't relay ingame messages targeted for all players if we're currently muting all
 						// note that commands will still be processed even when muting all because we only stop relaying the messages, the rest of the function is unaffected
@@ -4840,11 +4843,10 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 					}	
 					else if( ExtraFlags[0] == 1 )
 					{
-						if ( team_color == "2" ) color = "darkgreen";
-						m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") [Allies] <span style='color: "+color+"'><b>" + player->GetName( ) + "</b></span>: " + chatPlayer->GetMessage( ) );
+						m_ChatGameLog.push_back( UTIL_ToString(currentUnixTime) + "||~Allies~||" + UTIL_ToString(fteam+1) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ) );
 					}
 					else if( ExtraFlags[0] == 2 )
-						m_ChatGameLog.push_back( "(" + MinString + ":" + SecString + ") <span style='color: black;'><b>[Obs/Ref]</b></span>: [" + player->GetName( ) + "]: " + chatPlayer->GetMessage( ) );
+						m_ChatGameLog.push_back( UTIL_ToString(currentUnixTime) + "||~Obs/Ref~||" + UTIL_ToString(fteam+1) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ) );
 
 					if (m_Listen)
 					{
@@ -4912,7 +4914,7 @@ void CBaseGame :: EventPlayerChatToHost( CGamePlayer *player, CIncomingChatPlaye
 					currentFormattedTime.erase( currentFormattedTime.size( ) - 1 );
 
 					CONSOLE_Print( "[GAME: " + m_GameName + "] [Lobby] [" + player->GetName( ) + "][Time] [" + currentFormattedTime + "] :" + chatPlayer->GetMessage( ) );
-					m_ChatLobbyLog.push_back( UTIL_ToString(GetTime()) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ));
+					m_ChatLobbyLog.push_back( UTIL_ToString(currentUnixTime) + "||" + player->GetName( ) + "||" + chatPlayer->GetMessage( ));
 					m_GHost->UDPChatSend("|lobby "+player->GetName()+" "+chatPlayer->GetMessage());
 					if( m_MuteLobby )
 						Relay = false;
@@ -5637,6 +5639,9 @@ void CBaseGame :: EventGameStarted( )
 		(*i)->QueueGameUncreate( );
 		(*i)->QueueEnterChat( );
 	}
+	
+	string Query = "UPDATE gamestatus SET gamename = '@GAME " + m_GameName + "', starteddate = UNIX_TIMESTAMP() where gamename LIKE '@LOBBY " + m_GameName + "' and botid LIKE '" + UTIL_ToString(m_GHost->m_BotID) + "'";
+	m_RunQueries.push_back(m_GHost->m_DB->ThreadedRunQuery(Query));
 }
 
 void CBaseGame :: EventGameLoaded( )

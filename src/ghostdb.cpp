@@ -496,6 +496,11 @@ CCallableGameAdd *CGHostDB :: ThreadedGameAdd( string server, string map, string
 	return NULL;
 }
 
+CCallableGameInfoUpdate *CGHostDB :: ThreadedGameInfoUpdate( string gamename, string gameinfo, vector<string> chat )
+{
+	return NULL;
+}
+
 CCallableGamePlayerAdd *CGHostDB :: ThreadedGamePlayerAdd( uint32_t gameid, string name, string ip, uint32_t spoofed, string spoofedrealm, uint32_t reserved, uint32_t loadingtime, uint32_t left, string leftreason, uint32_t team, uint32_t colour )
 {
 	return NULL;
@@ -707,6 +712,11 @@ CCallableBanList :: ~CCallableBanList( )
 }
 
 CCallableGameAdd :: ~CCallableGameAdd( )
+{
+
+}
+
+CCallableGameInfoUpdate :: ~CCallableGameInfoUpdate( )
 {
 
 }

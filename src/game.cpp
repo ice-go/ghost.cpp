@@ -101,6 +101,8 @@ CGame :: CGame( CGHost *nGHost, CMap *nMap, CSaveGame *nSaveGame, uint16_t nHost
 
 CGame :: ~CGame( )
 {
+	m_GHost->m_Callables.push_back( m_GHost->m_DB->ThreadedRunQuery("DELETE FROM gamestatus WHERE gamename LIKE '@GAME " + m_GameName + "' and botid LIKE '" + UTIL_ToString( m_GHost->m_BotID ) + "'") );
+
 	uint32_t timehasleft;
 	uint32_t endtime = m_GameOverTime;
 	if (endtime == 0)

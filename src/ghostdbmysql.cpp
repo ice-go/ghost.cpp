@@ -568,6 +568,19 @@ CCallableGameAdd *CGHostDBMySQL :: ThreadedGameAdd( string server, string map, s
 	return Callable;
 }
 
+CCallableGameInfoUpdate *CGHostDBMySQL :: ThreadedGameInfoUpdate( string gamename, string gameinfo, vector<string> chat )
+{
+	void *Connection = GetIdleConnection( );
+
+	if( !Connection )
+		m_NumConnections++;
+
+	CCallableGameInfoUpdate *Callable = new CMySQLCallableGameInfoUpdate( gamename, gameinfo, chat, Connection, m_BotID, m_Server, m_Database, m_User, m_Password, m_Port );
+	CreateThread( Callable );
+	m_OutstandingCallables++;
+	return Callable;
+}
+
 CCallableGamePlayerAdd *CGHostDBMySQL :: ThreadedGamePlayerAdd( uint32_t gameid, string name, string ip, uint32_t spoofed, string spoofedrealm, uint32_t reserved, uint32_t loadingtime, uint32_t left, string leftreason, uint32_t team, uint32_t colour )
 {
 	void *Connection = GetIdleConnection( );
@@ -1616,6 +1629,20 @@ uint32_t MySQLGameAdd( void *conn, string *error, uint32_t botid, string server,
 	return RowID;
 }
 
+uint32_t MySQLGameInfoUpdate( void *conn, string *error, uint32_t botid, string gamename, string gameinfo, vector<string> chat )
+{
+	uint32_t RowID = 0;
+	string EscGameName = MySQLEscapeString( conn, gamename );
+	string EscGameInfo = MySQLEscapeString( conn, gameinfo );
+	string chatStr;
+	string EscChat;
+		
+	for( vector<string> :: iterator i = chat.begin( ); i != chat.end( ); i++ )
+			chatStr.append( (*i) + "\n" );
+	
+	EscChat = MySQLEscapeString( conn, chatStr );
+	string Query = "UPDATE gamestatus SET description='" + EscGameInfo + "', chat='" + EscChat + "' WHERE gamename LIKE '" + EscGameName + "' and botid LIKE '" + UTIL_ToString( botid ) + "'";
+
 	if( mysql_real_query( (MYSQL *)conn, Query.c_str( ), Query.size( ) ) != 0 )
 		*error = mysql_error( (MYSQL *)conn );
 	else
@@ -2520,6 +2547,16 @@ void CMySQLCallableGameAdd :: operator( )( )
 
 	if( m_Error.empty( ) )
 		m_Result = MySQLGameAdd( m_Connection, &m_Error, m_SQLBotID, m_Server, m_Map, m_GameName, m_OwnerName, m_Duration, m_GameState, m_CreatorName, m_CreatorServer, m_ChatLobbyLog, m_ChatGameLog );
+
+	Close( );
+}
+
+void CMySQLCallableGameInfoUpdate :: operator( )( )
+{
+	Init( );
+
+	if( m_Error.empty( ) )
+		m_Result = MySQLGameInfoUpdate( m_Connection, &m_Error, m_SQLBotID, m_GameName, m_GameInfo, m_Chat );
 
 	Close( );
 }

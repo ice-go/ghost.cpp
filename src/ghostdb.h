@@ -56,6 +56,7 @@ class CCallableBanAdd;
 class CCallableBanRemove;
 class CCallableBanList;
 class CCallableGameAdd;
+class CCallableGameInfoUpdate;
 class CCallableGamePlayerAdd;
 class CCallableGamePlayerSummaryCheck;
 class CCallableDotAGameAdd;
@@ -193,6 +194,7 @@ public:
 	virtual CCallableBanRemove *ThreadedBanRemove( string user, uint32_t warn );
 	virtual CCallableBanList *ThreadedBanList( string server );
 	virtual CCallableGameAdd *ThreadedGameAdd( string server, string map, string gamename, string ownername, uint32_t duration, uint32_t gamestate, string creatorname, string creatorserver, vector<string> chatlobbylog, vector<string> chatgamelog );
+	virtual CCallableGameInfoUpdate *ThreadedGameInfoUpdate( string gamename, string gameinfo, vector<string> chat );
 	virtual CCallableGamePlayerAdd *ThreadedGamePlayerAdd( uint32_t gameid, string name, string ip, uint32_t spoofed, string spoofedrealm, uint32_t reserved, uint32_t loadingtime, uint32_t left, string leftreason, uint32_t team, uint32_t colour );
 	virtual CCallableGamePlayerSummaryCheck *ThreadedGamePlayerSummaryCheck( string name );
 	virtual CCallableDotAGameAdd *ThreadedDotAGameAdd( uint32_t gameid, uint32_t winner, uint32_t min, uint32_t sec );
@@ -705,6 +707,22 @@ protected:
 public:
 	CCallableGameAdd( string nServer, string nMap, string nGameName, string nOwnerName, uint32_t nDuration, uint32_t nGameState, string nCreatorName, string nCreatorServer, vector<string> nChatLobbyLog, vector<string> nChatGameLog ) : CBaseCallable( ), m_Server( nServer ), m_Map( nMap ), m_GameName( nGameName ), m_OwnerName( nOwnerName ), m_Duration( nDuration ), m_GameState( nGameState ), m_CreatorName( nCreatorName ), m_CreatorServer( nCreatorServer ), m_ChatLobbyLog( nChatLobbyLog ), m_ChatGameLog( nChatGameLog ), m_Result( 0 ) { }
 	virtual ~CCallableGameAdd( );
+
+	virtual uint32_t GetResult( )				{ return m_Result; }
+	virtual void SetResult( uint32_t nResult )	{ m_Result = nResult; }
+};
+
+class CCallableGameInfoUpdate : virtual public CBaseCallable
+{
+protected:
+	string m_GameName;
+ 	string m_GameInfo; 
+ 	vector<string> m_Chat;
+	uint32_t m_Result;
+
+public:
+	CCallableGameInfoUpdate( string nGameName, string nGameInfo, vector<string> nChat ) : CBaseCallable( ), m_GameName( nGameName ), m_GameInfo( nGameInfo ), m_Chat( nChat ), m_Result( 0 ) { }
+	virtual ~CCallableGameInfoUpdate( );
 
 	virtual uint32_t GetResult( )				{ return m_Result; }
 	virtual void SetResult( uint32_t nResult )	{ m_Result = nResult; }

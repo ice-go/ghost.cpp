@@ -870,6 +870,8 @@ CGHost :: CGHost( CConfig *CFG )
 		m_DB = new CGHostDBSQLite( CFG );
 
 	m_BotID = CFG->GetInt( "db_mysql_botid", 0 );
+	m_Callables.push_back( m_DB->ThreadedRunQuery("DELETE FROM `gamestatus` WHERE botid LIKE '" + UTIL_ToString( m_BotID ) + "'"));
+
 	CONSOLE_Print( "[GHOST] opening secondary (local) database" );
 	m_DBLocal = new CGHostDBSQLite( CFG );
 
@@ -1484,10 +1486,51 @@ bool CGHost :: Update( unsigned long usecBlock )
 
 	if( m_CurrentGame )
 	{
+		if( GetTime() > m_CurrentGame->m_LastGameInfoTime + 1){
+			string LobbyInfo;
+				for( vector<CGamePlayer *> :: iterator i = m_CurrentGame->m_Players.begin( ); i != m_CurrentGame->m_Players.end( ); i++ )
+				{
+					CGamePlayer *Player = (*i);
+				    string PlayerInfo;
+				
+					PlayerInfo += UTIL_ToString((int)Player->GetSID()+1);
+					PlayerInfo += "|";
+					PlayerInfo += Player->GetName();
+					PlayerInfo += "|";
+					PlayerInfo += UTIL_ToString(Player->GetTotalGames() );
+					PlayerInfo += "|";
+					PlayerInfo += UTIL_ToString(Player->GetAvarageStayPercent() );
+					PlayerInfo += "|";
+					PlayerInfo += UTIL_ToString(Player->GetTotalTimePlayed());
+					PlayerInfo += "|";
+					PlayerInfo += UTIL_ToString(Player->GetExpirience());
+					PlayerInfo += "|";
+					for( vector<CBNET *> ::iterator j = m_BNETs.begin(); j != m_BNETs.end(); ++j){
+						if( Player->GetJoinedRealm() == (*j)->GetServer() )
+							PlayerInfo += (*j)->GetServerAlias();
+					}
+					if( Player->GetJoinedRealm().empty() ){
+						PlayerInfo += "Unknown";
+					}
+					if( Player->GetJoinedRealm()=="garena" ){
+						PlayerInfo += "Garena";
+					}
+					PlayerInfo += "|";
+					PlayerInfo += UTIL_ToString(Player->GetPing(true));
+					PlayerInfo += "|";
+					PlayerInfo += Player->GetCountry();
+					PlayerInfo += "|end|";
+				LobbyInfo += PlayerInfo;
+			}
+
+			m_Callables.push_back( m_DB->ThreadedGameInfoUpdate("@LOBBY " + m_CurrentGame->GetGameName(), LobbyInfo, m_CurrentGame->m_ChatLobbyLog ) );
+			m_CurrentGame->m_LastGameInfoTime = GetTime();
+		}
+
 		if( m_CurrentGame->Update( &fd, &send_fd ) )
 		{
 			CONSOLE_Print( "[GHOST] deleting current game [" + m_CurrentGame->GetGameName( ) + "]" );
-
+			m_Callables.push_back( m_DB->ThreadedRunQuery("DELETE FROM gamestatus WHERE gamename LIKE '@LOBBY " + m_CurrentGame->GetGameName() + "'") );
 #ifdef WIN32
 			if (m_wtv && m_CurrentGame->wtvprocessid != 0)
 			{
@@ -1567,6 +1610,53 @@ bool CGHost :: Update( unsigned long usecBlock )
 	uint32_t GameNr = 0;
 	for( vector<CBaseGame *> :: iterator i = m_Games.begin( ); i != m_Games.end( ); )
 	{
+		//update gamestatus
+		if( GetTime() > (*i)->m_LastGameInfoTime + 1 && !(*i)->m_GameLoading ){
+			string GameInfo;
+			for( vector<CGamePlayer *> :: iterator j = (*i)->m_Players.begin( ); j != (*i)->m_Players.end( ); j++ )
+			{
+				CGamePlayer *Player = (*j);
+				string PlayerInfo;
+			
+				PlayerInfo += UTIL_ToString((int)Player->GetSID()+1);
+				PlayerInfo += "|";
+				PlayerInfo += Player->GetName();
+				PlayerInfo += "|";
+				PlayerInfo += UTIL_ToString(Player->GetTotalGames() );
+				PlayerInfo += "|";
+				PlayerInfo += UTIL_ToString(Player->GetAvarageStayPercent() );
+				PlayerInfo += "|";
+				PlayerInfo += UTIL_ToString(Player->GetTotalTimePlayed());
+				PlayerInfo += "|";
+				PlayerInfo += UTIL_ToString(Player->GetExpirience());
+				PlayerInfo += "|";
+				for( vector<CBNET *> ::iterator k = m_BNETs.begin(); k != m_BNETs.end(); ++k){
+					if( Player->GetJoinedRealm() == (*k)->GetServer() )
+						PlayerInfo += (*k)->GetServerAlias();
+				}
+				if( Player->GetJoinedRealm().empty() ){
+					PlayerInfo += "Unknown";
+				}
+				if( Player->GetJoinedRealm()=="garena" ){
+					PlayerInfo += "Garena";
+				}
+				PlayerInfo += "|";
+				PlayerInfo += UTIL_ToString(Player->GetPing(true));
+				PlayerInfo += "|";
+				PlayerInfo += Player->GetCountry();
+				PlayerInfo += "|end|";
+				GameInfo += PlayerInfo;
+			}
+			
+			std::vector<string> lobbyChatAndGameChat;
+			lobbyChatAndGameChat.reserve(  (*i)->m_ChatLobbyLog.size() + (*i)->m_ChatGameLog.size() );
+			lobbyChatAndGameChat.insert( lobbyChatAndGameChat.end(), (*i)->m_ChatLobbyLog.begin(), (*i)->m_ChatLobbyLog.end() );
+			lobbyChatAndGameChat.insert( lobbyChatAndGameChat.end(), (*i)->m_ChatGameLog.begin(), (*i)->m_ChatGameLog.end() );
+
+			m_Callables.push_back( m_DB->ThreadedGameInfoUpdate("@GAME " + (*i)->GetGameName(), GameInfo, lobbyChatAndGameChat ) );
+			(*i)->m_LastGameInfoTime = GetTime();
+		}
+
 		if( (*i)->Update( &fd, &send_fd ) )
 		{
 			CONSOLE_Print( "[GHOST] deleting game [" + (*i)->GetGameName( ) + "]" );
